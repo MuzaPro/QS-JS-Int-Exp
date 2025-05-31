@@ -1,4 +1,4 @@
-// State Machine for Quantum Source Interactive Experience
+// State Machine for Quantum Source Interactive Experience v5
 
 // State definitions
 const states = {
@@ -58,6 +58,11 @@ const contentArea = document.getElementById('contentArea');
 const mainTitle = document.getElementById('mainTitle');
 const description1 = document.getElementById('description1');
 const description2 = document.getElementById('description2');
+// Mobile content elements
+const mobileContentArea = document.getElementById('mobileContentArea');
+const mobileMainTitle = document.getElementById('mobileMainTitle');
+const mobileDescription1 = document.getElementById('mobileDescription1');
+const mobileDescription2 = document.getElementById('mobileDescription2');
 const navItems = document.querySelectorAll('.nav-item');
 
 // Initialize on DOM load
@@ -286,9 +291,21 @@ function updateContent(stateId) {
     const state = states[stateId];
     if (!state) return;
 
+    // Update desktop content
     mainTitle.innerHTML = state.title;
     description1.innerHTML = state.descriptions[0] || '';
     description2.innerHTML = state.descriptions[1] || '';
+
+    // Update mobile content
+    if (mobileMainTitle) {
+        mobileMainTitle.innerHTML = state.title;
+    }
+    if (mobileDescription1) {
+        mobileDescription1.innerHTML = state.descriptions[0] || '';
+    }
+    if (mobileDescription2) {
+        mobileDescription2.innerHTML = state.descriptions[1] || '';
+    }
 }
 
 // Utility delay function

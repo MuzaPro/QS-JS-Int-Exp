@@ -1,12 +1,12 @@
-/* CSS Variables */
+/* CSS Variables v10*/
 :root {
     --secondary-bg: #0F282D;
     --main-bg: #183948;
-    --menu-bar: #09181fc9;
+    --menu-bar: #09181F;
     --secondary: #166470;
     --accent: #3EC1C9;
     --text-overlay-bg: rgba(15, 40, 45, 0.8); /* Made 10% more transparent */
-    --menu-gradient: linear-gradient(90deg, #0F282D 0%, rgba(15, 40, 45, 0.4) 100%);
+    --menu-gradient: linear-gradient(90deg, #0F282D 0%, rgba(15, 40, 45, 0.8) 100%);
 }
 
 /* CSS Reset */
@@ -153,40 +153,9 @@ html, body {
     font-weight: 600;
 }
 
-/* Utility Icons */
+/* Utility Icons - hidden on desktop, shown on mobile */
 .utility-menu {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 1.5rem;
-    z-index: 15;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.utility-btn {
-    width: 40px;
-    height: 40px;
-    background: rgba(15, 40, 45, 0.8);
-    border: 1px solid rgba(62, 193, 201, 0.3);
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.utility-btn:hover {
-    background: rgba(62, 193, 201, 0.2);
-    border-color: var(--accent);
-}
-
-.utility-icon {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
+    display: none;
 }
 
 /* Responsive Design */
@@ -209,94 +178,152 @@ html, body {
 }
 
 @media (max-width: 768px) {
+    /* Mobile Layout: Split into left controls (15%) and content strip (20%) */
     .sidebar {
-        width: 100vw;
+        width: 15vw;
+        background: var(--menu-bar);
+    }
+    
+    /* Mobile Content Strip */
+    .mobile-content-strip {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 15vw;
+        width: 20vw;
+        height: 100vh;
+        background: var(--text-overlay-bg);
+        z-index: 10;
+        padding: 1rem 0.75rem;
+        overflow-y: auto;
+        transition: opacity 0.3s ease;
+    }
+    
+    .mobile-content-strip.fade-out {
+        opacity: 0;
+    }
+    
+    /* Hide original content area on mobile */
+    .content-area {
+        display: none;
     }
     
     .main-title {
-        font-size: 1.4rem;
-        margin-bottom: 1rem;
-    }
-    
-    .content-area {
-        padding: 1.5rem 1.25rem;
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
     }
     
     .description {
-        font-size: 0.9rem;
-        line-height: 1.5;
-        margin-bottom: 0.75rem;
+        font-size: 0.75rem;
+        line-height: 1.4;
+        margin-bottom: 0.5rem;
     }
     
-    /* Compact navigation on mobile */
+    /* Compact navigation on mobile - remove background */
     .nav-menu {
-        padding: 1rem 0;
+        padding: 0;
+        background: transparent;
+        border-bottom: 1px solid rgba(62, 193, 201, 0.2);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     
     .nav-item {
-        padding: 0.6rem 1.25rem;
+        padding: 0.4rem 0.5rem;
+        font-size: 0.7rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 0.25rem;
     }
     
     .nav-item:hover {
-        padding-left: 1.5rem;
+        padding-left: 0.5rem;
+        background: rgba(62, 193, 201, 0.1);
+    }
+    
+    .nav-item.active {
+        background: rgba(62, 193, 201, 0.2);
+        border-right: 2px solid var(--accent);
     }
     
     .nav-icon {
-        width: 20px;
-        height: 20px;
-        margin-right: 0.75rem;
+        width: 16px;
+        height: 16px;
+        margin-right: 0;
+        margin-bottom: 0.2rem;
     }
     
     .nav-text {
-        font-size: 0.85rem;
+        font-size: 0.65rem;
+        font-weight: 500;
     }
     
-    /* Reposition utility buttons to top of content area on mobile */
+    /* Utility buttons at top of left strip */
     .utility-menu {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        left: auto;
-        bottom: auto;
+        display: flex;
+        position: static;
         flex-direction: row;
-        gap: 0.5rem;
+        gap: 0.3rem;
+        justify-content: center;
+        padding: 0.75rem 0.25rem;
+        border-bottom: 1px solid rgba(62, 193, 201, 0.2);
     }
     
     .utility-btn {
-        width: 36px;
-        height: 36px;
+        width: 28px;
+        height: 28px;
+        background: rgba(15, 40, 45, 0.8);
+        border: 1px solid rgba(62, 193, 201, 0.3);
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .utility-btn:hover {
+        background: rgba(62, 193, 201, 0.2);
+        border-color: var(--accent);
     }
     
     .utility-icon {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
+        fill: currentColor;
     }
 }
 
 /* Extra small mobile devices */
 @media (max-width: 480px) {
     .main-title {
-        font-size: 1.2rem;
-        line-height: 1.3;
-    }
-    
-    .content-area {
-        padding: 1.25rem 1rem;
+        font-size: 1rem;
+        line-height: 1.2;
     }
     
     .description {
-        font-size: 0.85rem;
+        font-size: 0.7rem;
     }
     
     .nav-item {
-        padding: 0.5rem 1rem;
-    }
-    
-    .nav-item:hover {
-        padding-left: 1.25rem;
+        padding: 0.35rem 0.4rem;
     }
     
     .nav-text {
-        font-size: 0.8rem;
+        font-size: 0.6rem;
+    }
+    
+    .utility-btn {
+        width: 26px;
+        height: 26px;
+    }
+    
+    .utility-icon {
+        width: 12px;
+        height: 12px;
     }
 }
