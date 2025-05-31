@@ -1,4 +1,4 @@
-/* CSS Variables v10*/
+/* CSS Variables v15*/
 :root {
     --secondary-bg: #0F282D;
     --main-bg: #183948;
@@ -58,30 +58,62 @@ html, body {
     opacity: 1;
 }
 
-/* Left Sidebar */
+/* Left Sidebar - Always split layout */
 .sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    width: 25vw;
+    width: 10vw;
     height: 100vh;
-    background: var(--menu-gradient);
+    background: var(--menu-bar);
     z-index: 10;
     display: flex;
     flex-direction: column;
 }
 
+/* Content Strip - Always separate */
+.content-strip {
+    position: fixed;
+    top: 0;
+    left: 10vw;
+    width: 30vw;
+    height: 100vh;
+    background: var(--text-overlay-bg);
+    z-index: 10;
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    transition: opacity 0.3s ease;
+}
+
+.content-strip.fade-out {
+    opacity: 0;
+}
+
+/* Hide original content area - we're using the new layout for all screens */
+.content-area {
+    display: none;
+}
+
+/* Hide mobile content strip - we're using the new unified strip */
+.mobile-content-strip {
+    display: none;
+}
+
 /* Navigation Menu */
 .nav-menu {
-    background: var(--menu-bar);
-    padding: 2rem 0;
+    background: transparent;
+    padding: 0;
     border-bottom: 1px solid rgba(62, 193, 201, 0.2);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 0.8rem 0.6rem;
     color: white;
     text-decoration: none;
     transition: all 0.3s ease;
@@ -90,11 +122,13 @@ html, body {
     width: 100%;
     cursor: pointer;
     font-family: inherit;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.4rem;
 }
 
 .nav-item:hover {
     background: rgba(62, 193, 201, 0.1);
-    padding-left: 2.5rem;
 }
 
 .nav-item.active {
@@ -103,227 +137,60 @@ html, body {
 }
 
 .nav-icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 1rem;
+    width: 20px;
+    height: 20px;
+    margin-right: 0;
     fill: currentColor;
 }
 
 .nav-text {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     font-weight: 500;
 }
 
-/* Content Area */
-.content-area {
-    flex: 1;
-    padding: 3rem 2rem;
-    background: var(--text-overlay-bg);
-    overflow-y: auto;
-    transition: opacity 0.3s ease;
+/* Utility Icons - Always visible */
+.utility-menu {
+    display: flex;
+    flex-direction: row;
+    gap: 0.4rem;
+    justify-content: center;
+    padding: 1rem 0.4rem;
+    border-bottom: 1px solid rgba(62, 193, 201, 0.2);
 }
 
-.content-area.fade-out {
-    opacity: 0;
+.utility-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(15, 40, 45, 0.8);
+    border: 1px solid rgba(62, 193, 201, 0.3);
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.utility-btn:hover {
+    background: rgba(62, 193, 201, 0.2);
+    border-color: var(--accent);
+}
+
+.utility-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
 }
 
 .main-title {
-    font-family: 'Overpass', sans-serif;
-    font-weight: 700;
-    font-size: 2rem;
-    color: white;
-    line-height: 1.2;
-    margin-bottom: 1.5rem;
+    color: white !important;  /* Added !important for specificity */
 }
 
 .description {
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.6;
-    font-size: 1rem;
-    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.9) !important;  /* White with 90% opacity */
 }
 
-.description:last-child {
-    margin-bottom: 0;
-}
-
-/* Highlight text */
 .highlight {
-    color: var(--accent);
-    font-weight: 600;
-}
-
-/* Utility Icons - hidden on desktop, shown on mobile */
-.utility-menu {
-    display: none;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 35vw;
-    }
-    
-    .main-title {
-        font-size: 1.75rem;
-    }
-    
-    .nav-item {
-        padding: 0.75rem 1.5rem;
-    }
-    
-    .nav-item:hover {
-        padding-left: 2rem;
-    }
-}
-
-@media (max-width: 768px) {
-    /* Mobile Layout: Split into left controls (15%) and content strip (20%) */
-    .sidebar {
-        width: 15vw;
-        background: var(--menu-bar);
-    }
-    
-    /* Mobile Content Strip */
-    .mobile-content-strip {
-        display: block;
-        position: fixed;
-        top: 0;
-        left: 15vw;
-        width: 20vw;
-        height: 100vh;
-        background: var(--text-overlay-bg);
-        z-index: 10;
-        padding: 1rem 0.75rem;
-        overflow-y: auto;
-        transition: opacity 0.3s ease;
-    }
-    
-    .mobile-content-strip.fade-out {
-        opacity: 0;
-    }
-    
-    /* Hide original content area on mobile */
-    .content-area {
-        display: none;
-    }
-    
-    .main-title {
-        font-size: 1.1rem;
-        margin-bottom: 0.75rem;
-        line-height: 1.2;
-    }
-    
-    .description {
-        font-size: 0.75rem;
-        line-height: 1.4;
-        margin-bottom: 0.5rem;
-    }
-    
-    /* Compact navigation on mobile - remove background */
-    .nav-menu {
-        padding: 0;
-        background: transparent;
-        border-bottom: 1px solid rgba(62, 193, 201, 0.2);
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    
-    .nav-item {
-        padding: 0.4rem 0.5rem;
-        font-size: 0.7rem;
-        flex-direction: column;
-        text-align: center;
-        gap: 0.25rem;
-    }
-    
-    .nav-item:hover {
-        padding-left: 0.5rem;
-        background: rgba(62, 193, 201, 0.1);
-    }
-    
-    .nav-item.active {
-        background: rgba(62, 193, 201, 0.2);
-        border-right: 2px solid var(--accent);
-    }
-    
-    .nav-icon {
-        width: 16px;
-        height: 16px;
-        margin-right: 0;
-        margin-bottom: 0.2rem;
-    }
-    
-    .nav-text {
-        font-size: 0.65rem;
-        font-weight: 500;
-    }
-    
-    /* Utility buttons at top of left strip */
-    .utility-menu {
-        display: flex;
-        position: static;
-        flex-direction: row;
-        gap: 0.3rem;
-        justify-content: center;
-        padding: 0.75rem 0.25rem;
-        border-bottom: 1px solid rgba(62, 193, 201, 0.2);
-    }
-    
-    .utility-btn {
-        width: 28px;
-        height: 28px;
-        background: rgba(15, 40, 45, 0.8);
-        border: 1px solid rgba(62, 193, 201, 0.3);
-        border-radius: 4px;
-        color: white;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-    }
-    
-    .utility-btn:hover {
-        background: rgba(62, 193, 201, 0.2);
-        border-color: var(--accent);
-    }
-    
-    .utility-icon {
-        width: 14px;
-        height: 14px;
-        fill: currentColor;
-    }
-}
-
-/* Extra small mobile devices */
-@media (max-width: 480px) {
-    .main-title {
-        font-size: 1rem;
-        line-height: 1.2;
-    }
-    
-    .description {
-        font-size: 0.7rem;
-    }
-    
-    .nav-item {
-        padding: 0.35rem 0.4rem;
-    }
-    
-    .nav-text {
-        font-size: 0.6rem;
-    }
-    
-    .utility-btn {
-        width: 26px;
-        height: 26px;
-    }
-    
-    .utility-icon {
-        width: 12px;
-        height: 12px;
-    }
+    color: var(--accent) !important;  /* Your brand cyan color */
 }

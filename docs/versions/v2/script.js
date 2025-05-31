@@ -1,4 +1,4 @@
-// State Machine for Quantum Source Interactive Experience v11
+// State Machine for Quantum Source Interactive Experience v5
 
 // State definitions
 const states = {
@@ -51,57 +51,26 @@ const animations = {
 let currentState = 1;
 let isTransitioning = false;
 
-// Sound effect setup
-let buttonSound = null;
-
 // DOM elements
 const stateVisual = document.getElementById('stateVisual');
 const stateAnimation = document.getElementById('stateAnimation');
-const contentStrip = document.getElementById('contentStrip');
-const stripMainTitle = document.getElementById('stripMainTitle');
-const stripDescription1 = document.getElementById('stripDescription1');
-const stripDescription2 = document.getElementById('stripDescription2');
+const contentArea = document.getElementById('contentArea');
+const mainTitle = document.getElementById('mainTitle');
+const description1 = document.getElementById('description1');
+const description2 = document.getElementById('description2');
+// Mobile content elements
+const mobileContentArea = document.getElementById('mobileContentArea');
+const mobileMainTitle = document.getElementById('mobileMainTitle');
+const mobileDescription1 = document.getElementById('mobileDescription1');
+const mobileDescription2 = document.getElementById('mobileDescription2');
 const navItems = document.querySelectorAll('.nav-item');
 
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
     setupNavListeners();
     preloadAnimations();
-    preloadSounds();
     updateActiveNav();
 });
-
-// Preload sound effects
-function preloadSounds() {
-    try {
-        buttonSound = new Audio('assets/sound/buttonSFX.wav');
-        buttonSound.preload = 'auto';
-        buttonSound.volume = 0.1; // Adjust volume (0.0 to 1.0)
-        
-        // Handle loading errors gracefully
-        buttonSound.onerror = () => {
-            console.warn('Could not load button sound effect');
-            buttonSound = null;
-        };
-    } catch (error) {
-        console.warn('Audio not supported or sound file not found');
-        buttonSound = null;
-    }
-}
-
-// Play button sound effect
-function playButtonSound() {
-    if (buttonSound) {
-        try {
-            buttonSound.currentTime = 0; // Reset to start
-            buttonSound.play().catch(err => {
-                console.warn('Could not play sound:', err);
-            });
-        } catch (error) {
-            console.warn('Error playing sound:', error);
-        }
-    }
-}
 
 // Setup navigation listeners
 function setupNavListeners() {
@@ -109,7 +78,6 @@ function setupNavListeners() {
         item.addEventListener('click', () => {
             const target = Number(item.dataset.state);
             if (!isTransitioning && target !== currentState && states[target]) {
-                playButtonSound(); // Play sound effect on valid click
                 transitionToState(target);
             }
         });
@@ -323,10 +291,21 @@ function updateContent(stateId) {
     const state = states[stateId];
     if (!state) return;
 
-    // Update unified content strip
-    stripMainTitle.innerHTML = state.title;
-    stripDescription1.innerHTML = state.descriptions[0] || '';
-    stripDescription2.innerHTML = state.descriptions[1] || '';
+    // Update desktop content
+    mainTitle.innerHTML = state.title;
+    description1.innerHTML = state.descriptions[0] || '';
+    description2.innerHTML = state.descriptions[1] || '';
+
+    // Update mobile content
+    if (mobileMainTitle) {
+        mobileMainTitle.innerHTML = state.title;
+    }
+    if (mobileDescription1) {
+        mobileDescription1.innerHTML = state.descriptions[0] || '';
+    }
+    if (mobileDescription2) {
+        mobileDescription2.innerHTML = state.descriptions[1] || '';
+    }
 }
 
 // Utility delay function
