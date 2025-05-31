@@ -2,11 +2,11 @@
 :root {
     --secondary-bg: #0F282D;
     --main-bg: #183948;
-    --menu-bar: #09181F;
+    --menu-bar: #09181fc9;
     --secondary: #166470;
     --accent: #3EC1C9;
     --text-overlay-bg: rgba(15, 40, 45, 0.8); /* Made 10% more transparent */
-    --menu-gradient: linear-gradient(90deg, #0F282D 0%, rgba(15, 40, 45, 0.8) 100%);
+    --menu-gradient: linear-gradient(90deg, #0F282D 0%, rgba(15, 40, 45, 0.4) 100%);
 }
 
 /* CSS Reset */
@@ -63,7 +63,7 @@ html, body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 33.333vw;
+    width: 25vw;
     height: 100vh;
     background: var(--menu-gradient);
     z-index: 10;
@@ -156,20 +156,20 @@ html, body {
 /* Utility Icons */
 .utility-menu {
     position: fixed;
-    bottom: 2rem;
-    left: 2rem;
+    bottom: 1.5rem;
+    left: 1.5rem;
     z-index: 15;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .utility-btn {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     background: rgba(15, 40, 45, 0.8);
     border: 1px solid rgba(62, 193, 201, 0.3);
-    border-radius: 8px;
+    border-radius: 6px;
     color: white;
     cursor: pointer;
     display: flex;
@@ -184,15 +184,27 @@ html, body {
 }
 
 .utility-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     fill: currentColor;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
     .sidebar {
-        width: 40vw;
+        width: 35vw;
+    }
+    
+    .main-title {
+        font-size: 1.75rem;
+    }
+    
+    .nav-item {
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .nav-item:hover {
+        padding-left: 2rem;
     }
 }
 
@@ -202,10 +214,89 @@ html, body {
     }
     
     .main-title {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
     }
     
     .content-area {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem 1.25rem;
+    }
+    
+    .description {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Compact navigation on mobile */
+    .nav-menu {
+        padding: 1rem 0;
+    }
+    
+    .nav-item {
+        padding: 0.6rem 1.25rem;
+    }
+    
+    .nav-item:hover {
+        padding-left: 1.5rem;
+    }
+    
+    .nav-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 0.75rem;
+    }
+    
+    .nav-text {
+        font-size: 0.85rem;
+    }
+    
+    /* Reposition utility buttons to top of content area on mobile */
+    .utility-menu {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        left: auto;
+        bottom: auto;
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+    
+    .utility-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .utility-icon {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+    .main-title {
+        font-size: 1.2rem;
+        line-height: 1.3;
+    }
+    
+    .content-area {
+        padding: 1.25rem 1rem;
+    }
+    
+    .description {
+        font-size: 0.85rem;
+    }
+    
+    .nav-item {
+        padding: 0.5rem 1rem;
+    }
+    
+    .nav-item:hover {
+        padding-left: 1.25rem;
+    }
+    
+    .nav-text {
+        font-size: 0.8rem;
     }
 }
