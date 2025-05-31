@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Source - Universal Quantum Computing</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    
+    <!-- Overpass Font -->
+    <style>
+        @font-face {
+            font-family: 'Overpass';
+            src: url('assets/brand/fonts/Overpass/Overpass-VariableFont_wght.ttf') format('truetype');
+            font-weight: 100 900;
+            font-display: swap;
+        }
+        
+        @font-face {
+            font-family: 'Overpass';
+            src: url('assets/brand/fonts/Overpass/static/Overpass-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+        }
+
+        /* CSS Reset and Variables */
+        :root {
+            --secondary-bg: #0F282D;
+            --main-bg: #183948;
+            --menu-bar: #09181F;
+            --secondary: #166470;
+            --accent: #3EC1C9;
+            --text-overlay-bg: rgba(15, 40, 45, 0.9);
+            --menu-gradient: linear-gradient(90deg, #0F282D 0%, rgba(15, 40, 45, 0.8) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Overpass', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            background: var(--menu-bar);
+        }
+
+        /* Full Screen Background Container */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .state-visual {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .state-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+
+        .state-animation.playing {
+            opacity: 1;
+        }
+
+        /* Left Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 33.333vw;
+            height: 100vh;
+            background: var(--menu-gradient);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Menu */
+        .nav-menu {
+            background: var(--menu-bar);
+            padding: 2rem 0;
+            border-bottom: 1px solid rgba(62, 193, 201, 0.2);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .nav-item:hover {
+            background: rgba(62, 193, 201, 0.1);
+            padding-left: 2.5rem;
+        }
+
+        .nav-item.active {
+            background: rgba(62, 193, 201, 0.2);
+            border-right: 3px solid var(--accent);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 1rem;
+            fill: currentColor;
+        }
+
+        .nav-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            padding: 3rem 2rem;
+            background: var(--text-overlay-bg);
+            overflow-y: auto;
+        }
+
+        .main-title {
+            font-family: 'Overpass', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .description {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .description:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Highlight text */
+        .highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Utility Icons */
+        .utility-menu {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .utility-btn {
+            width: 48px;
+            height: 48px;
+            background: rgba(15, 40, 45, 0.8);
+            border: 1px solid rgba(62, 193, 201, 0.3);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .utility-btn:hover {
+            background: rgba(62, 193, 201, 0.2);
+            border-color: var(--accent);
+        }
+
+        .utility-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Fade transitions for content */
+        .content-area {
+            transition: opacity 0.3s ease;
+        }
+
+        .content-area.fade-out {
+            opacity: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 40vw;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100vw;
+            }
+            
+            .main-title {
+                font-size: 1.5rem;
+            }
+            
+            .content-area {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation/Image Container -->
+    <div class="background-container">
+        <img src="assets/images/state1-static.webp" 
+             alt="Quantum Source Lab Environment" 
+             class="state-visual"
+             id="stateVisual">
+        <video class="state-animation" 
+               id="stateAnimation"
+               preload="auto"
+               muted>
+            <source src="" type="video/webm">
+        </video>
+    </div>
+
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+        <!-- Navigation Menu -->
+        <nav class="nav-menu">
+            <button class="nav-item active" data-state="1">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                <span class="nav-text">Overview</span>
+            </button>
+            
+            <button class="nav-item" data-state="2">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <span class="nav-text">System</span>
+            </button>
+            
+            <button class="nav-item" data-state="3">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23c-.25-.44-.79-.62-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31C14.8 2.38 14.37 2 13.87 2h-3.73c-.5 0-.93.38-.99.88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.42 8.61c-.25.44-.14 1 .26 1.3l1.86 1.41C4.51 11.55 4.5 11.77 4.5 12s.01.45.03.68l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-1-.26-1.3l-1.86-1.41c.02-.23.03-.45.03-.68zm-7.5 1.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                </svg>
+                <span class="nav-text">Chamber</span>
+            </button>
+            
+            <button class="nav-item" data-state="5">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M9 4v1.38c-.83-.33-1.72-.5-2.61-.5-1.79 0-3.58.68-4.95 2.05l3.33 3.33h1.11v1.11c.86.86 1.98 1.31 3.11 1.36V15H6v3c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-3h-2.99v-2.26c1.13-.05 2.25-.5 3.11-1.36V10.5h1.11l3.33-3.33c-1.37-1.37-3.16-2.05-4.95-2.05-.89 0-1.78.17-2.61.5V4H9z"/>
+                </svg>
+                <span class="nav-text">Technology</span>
+            </button>
+        </nav>
+
+        <!-- Content Area -->
+        <div class="content-area" id="contentArea">
+            <h1 class="main-title" id="mainTitle">Introduction to Modestly Sized Quantum Computing</h1>
+            <p class="description" id="description1">
+                This is a mockup text that I am using for the introductory screen.
+            </p>
+            <p class="description" id="description2">
+                The text will introduce the interactive elements and invite visitors to explore the conceptual structure of a quantum computer that fits in your room (instead of <em>being</em> the room).
+            </p>
+        </div>
+    </div>
+
+    <!-- Utility Menu -->
+    <div class="utility-menu">
+        <button class="utility-btn" title="Menu">
+            <svg class="utility-icon" viewBox="0 0 24 24">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+        </button>
+        
+        <button class="utility-btn" title="Home">
+            <svg class="utility-icon" viewBox="0 0 24 24">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+        </button>
+        
+        <button class="utility-btn" title="Audio">
+            <svg class="utility-icon" viewBox="0 0 24 24">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        // State Machine for Quantum Source Interactive Experience
+        const states = {
+            1: {
+                title: "Introduction to Modestly Sized Quantum Computing",
+                descriptions: [
+                    "Welcome to the future of quantum computing. Instead of requiring factory-sized facilities, our technology brings universal quantum computers to your laboratory.",
+                    "The text will introduce the interactive elements and invite visitors to explore the conceptual structure of a quantum computer that fits in your room (instead of being the room)."
+                ],
+                image: "assets/images/state1-static.webp"
+            },
+            2: {
+                title: "Quantum System Components",
+                descriptions: [
+                    "Our quantum computer consists of three main components: the vacuum chamber housing the qubits, optical fiber memory for photon storage, and classical processing unit.",
+                    "This <span class='highlight'>deterministic approach</span> eliminates the massive resource overhead of probabilistic systems, making quantum computing accessible and practical."
+                ],
+                image: "assets/images/state2-static.webp"
+            },
+            3: {
+                title: "Room Temperature Advantage",
+                descriptions: [
+                    "Unlike competing technologies requiring extreme cooling, our <span class='highlight'>vacuum chamber operates at room temperature</span>, dramatically reducing infrastructure costs.",
+                    "The rubidium atoms are perfectly isolated from environmental noise while remaining accessible for precise manipulation and measurement."
+                ],
+                image: "assets/images/state3-static.webp"
+            },
+            5: {
+                title: "Breakthrough Technology",
+                descriptions: [
+                    "Our <span class='highlight'>photon-atom integration</span> achieves deterministic quantum operations with 10,000x greater efficiency than probabilistic approaches.",
+                    "This technology enables the construction of million-qubit systems in compact form factors, bringing practical quantum computing within reach of enterprises and governments worldwide."
+                ],
+                image: "assets/images/state5-static.webp"
+            }
+        };
+
+        // Animation paths
+        const animations = {
+            "1-2": "assets/animations/1to2.webm",
+            "2-1": "assets/animations/2to1.webm",
+            "1-5": "assets/animations/1to5.webm",
+            "5-1": "assets/animations/5to1.webm",
+            "2-3": "assets/animations/2to3.webm",
+            "3-2": "assets/animations/3to2.webm"
+        };
+
+        // Current state
+        let currentState = 1;
+        let isTransitioning = false;
+
+        // DOM elements
+        const stateVisual = document.getElementById('stateVisual');
+        const stateAnimation = document.getElementById('stateAnimation');
+        const contentArea = document.getElementById('contentArea');
+        const mainTitle = document.getElementById('mainTitle');
+        const description1 = document.getElementById('description1');
+        const description2 = document.getElementById('description2');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupNavListeners();
+            preloadAnimations();
+            updateActiveNav();
+        });
+
+        // Setup navigation listeners
+        function setupNavListeners() {
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const target = Number(item.dataset.state);
+                    if (!isTransitioning && target !== currentState && states[target]) {
+                        transitionToState(target);
+                    }
+                });
+            });
+        }
+
+        // Update active navigation state
+        function updateActiveNav() {
+            navItems.forEach(item => {
+                item.classList.toggle('active', Number(item.dataset.state) === currentState);
+            });
+        }
+
+        // Preload animations
+        function preloadAnimations() {
+            Object.values(animations).forEach(path => {
+                const video = document.createElement('video');
+                video.src = path;
+                video.preload = 'auto';
+                video.onerror = () => {
+                    console.warn(`Unable to preload animation: ${path}`);
+                };
+            });
+        }
+
+        // Main transition function
+        async function transitionToState(targetState) {
+            if (isTransitioning || targetState === currentState || !states[targetState]) return;
+
+            isTransitioning = true;
+
+            const key = `${currentState}-${targetState}`;
+            const animationPath = animations[key];
+            
+            try {
+                // Check if we need compound transition (through state 2)
+                if (!animationPath) {
+                    if ((currentState === 1 && targetState === 3) || 
+                        (currentState === 3 && targetState === 1) ||
+                        (currentState === 3 && targetState === 5) ||
+                        (currentState === 5 && targetState === 3)) {
+                        console.log(`Using compound transition: ${currentState} → 2 → ${targetState}`);
+                        await performCompoundTransition(currentState, 2, targetState);
+                    } else {
+                        console.log(`No animation found for transition ${currentState}-${targetState}, using instant transition`);
+                        await instantTransition(targetState);
+                    }
+                } else {
+                    // Direct transition
+                    console.log(`Playing direct transition: ${currentState} → ${targetState}`);
+                    await playTransitionAnimation(animationPath, targetState);
+                }
+
+                // Fade out current content
+                contentArea.classList.add('fade-out');
+                await wait(300);
+
+                // Update content
+                updateContent(targetState);
+
+                // Update state
+                currentState = targetState;
+
+                // Update nav state
+                updateActiveNav();
+
+                // Fade in new content
+                contentArea.classList.remove('fade-out');
+            } catch (error) {
+                console.error('Transition error:', error);
+                // Recovery
+                updateContent(targetState);
+                currentState = targetState;
+                updateActiveNav();
+                contentArea.classList.remove('fade-out');
+            } finally {
+                isTransitioning = false;
+            }
+        }
+
+        // Compound transition through intermediate state
+        async function performCompoundTransition(fromState, intermediateState, toState) {
+            console.log(`Starting compound transition: ${fromState} → ${intermediateState} → ${toState}`);
+            
+            try {
+                // First leg
+                const firstKey = `${fromState}-${intermediateState}`;
+                const firstAnimation = animations[firstKey];
+                
+                if (firstAnimation) {
+                    await playTransitionAnimation(firstAnimation, intermediateState);
+                } else {
+                    await instantTransition(intermediateState);
+                }
+                
+                await wait(100);
+                
+                // Second leg
+                const secondKey = `${intermediateState}-${toState}`;
+                const secondAnimation = animations[secondKey];
+                
+                if (secondAnimation) {
+                    await playTransitionAnimation(secondAnimation, toState);
+                } else {
+                    await instantTransition(toState);
+                }
+            } catch (error) {
+                console.error('Error in compound transition:', error);
+                await instantTransition(toState);
+            }
+        }
+
+        // Instant transition fallback
+        function instantTransition(targetState) {
+            return new Promise((resolve) => {
+                const newState = states[targetState];
+                if (newState && newState.image) {
+                    const tempImg = new Image();
+                    tempImg.onload = () => {
+                        stateVisual.src = tempImg.src;
+                        resolve();
+                    };
+                    tempImg.onerror = () => {
+                        console.warn(`Failed to load image: ${newState.image}`);
+                        resolve();
+                    };
+                    tempImg.src = newState.image;
+                } else {
+                    resolve();
+                }
+            });
+        }
+
+        // Play transition animation
+        function playTransitionAnimation(animationPath, targetState) {
+            return new Promise((resolve, reject) => {
+                stateAnimation.src = animationPath;
+
+                stateAnimation.onloadedmetadata = () => {
+                    stateAnimation.currentTime = 0;
+                    stateAnimation.playbackRate = 1;
+
+                    stateAnimation.classList.add('playing');
+                    stateAnimation
+                        .play()
+                        .catch(err => {
+                            console.error('Playback error:', err);
+                            updateToTargetImage();
+                        });
+                };
+
+                stateAnimation.onended = () => {
+                    updateToTargetImage();
+                };
+
+                stateAnimation.onerror = () => {
+                    console.error(`Failed to load animation: ${animationPath}`);
+                    instantTransition(targetState).then(resolve).catch(reject);
+                };
+
+                function updateToTargetImage() {
+                    const newState = states[targetState];
+                    if (newState && newState.image) {
+                        const tempImg = new Image();
+                        tempImg.onload = () => {
+                            stateVisual.src = tempImg.src;
+                            setTimeout(() => {
+                                stateAnimation.classList.remove('playing');
+                                resolve();
+                            }, 50);
+                        };
+                        tempImg.onerror = () => {
+                            console.warn(`Failed to load image: ${newState.image}`);
+                            stateAnimation.classList.remove('playing');
+                            resolve();
+                        };
+                        tempImg.src = newState.image;
+                    } else {
+                        stateAnimation.classList.remove('playing');
+                        resolve();
+                    }
+                }
+            });
+        }
+
+        // Update content for given state
+        function updateContent(stateId) {
+            const state = states[stateId];
+            if (!state) return;
+
+            mainTitle.innerHTML = state.title;
+            description1.innerHTML = state.descriptions[0] || '';
+            description2.innerHTML = state.descriptions[1] || '';
+        }
+
+        // Utility delay function
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Handle browser back/forward
+        window.addEventListener('popstate', (event) => {
+            if (event.state?.stateId !== undefined) {
+                transitionToState(event.state.stateId);
+            }
+        });
+    </script>
+</body>
+</html>
