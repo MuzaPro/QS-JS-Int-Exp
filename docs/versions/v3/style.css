@@ -1,0 +1,196 @@
+/* CSS Variables v15*/
+:root {
+    --secondary-bg: #0F282D;
+    --main-bg: #183948;
+    --menu-bar: #09181F;
+    --secondary: #166470;
+    --accent: #3EC1C9;
+    --text-overlay-bg: rgba(15, 40, 45, 0.8); /* Made 10% more transparent */
+    --menu-gradient: linear-gradient(90deg, #0F282D 0%, rgba(15, 40, 45, 0.8) 100%);
+}
+
+/* CSS Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: 'Overpass', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    background: var(--menu-bar);
+}
+
+/* Full Screen Background Container */
+.background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.state-visual {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.state-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+.state-animation.playing {
+    opacity: 1;
+}
+
+/* Left Sidebar - Always split layout */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10vw;
+    height: 100vh;
+    background: var(--menu-bar);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Content Strip - Always separate */
+.content-strip {
+    position: fixed;
+    top: 0;
+    left: 10vw;
+    width: 30vw;
+    height: 100vh;
+    background: var(--text-overlay-bg);
+    z-index: 10;
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    transition: opacity 0.3s ease;
+}
+
+.content-strip.fade-out {
+    opacity: 0;
+}
+
+/* Hide original content area - we're using the new layout for all screens */
+.content-area {
+    display: none;
+}
+
+/* Hide mobile content strip - we're using the new unified strip */
+.mobile-content-strip {
+    display: none;
+}
+
+/* Navigation Menu */
+.nav-menu {
+    background: transparent;
+    padding: 0;
+    border-bottom: 1px solid rgba(62, 193, 201, 0.2);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 0.6rem;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.4rem;
+}
+
+.nav-item:hover {
+    background: rgba(62, 193, 201, 0.1);
+}
+
+.nav-item.active {
+    background: rgba(62, 193, 201, 0.2);
+    border-right: 3px solid var(--accent);
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 0;
+    fill: currentColor;
+}
+
+.nav-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Utility Icons - Always visible */
+.utility-menu {
+    display: flex;
+    flex-direction: row;
+    gap: 0.4rem;
+    justify-content: center;
+    padding: 1rem 0.4rem;
+    border-bottom: 1px solid rgba(62, 193, 201, 0.2);
+}
+
+.utility-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(15, 40, 45, 0.8);
+    border: 1px solid rgba(62, 193, 201, 0.3);
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.utility-btn:hover {
+    background: rgba(62, 193, 201, 0.2);
+    border-color: var(--accent);
+}
+
+.utility-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.main-title {
+    color: white !important;  /* Added !important for specificity */
+}
+
+.description {
+    color: rgba(255, 255, 255, 0.9) !important;  /* White with 90% opacity */
+}
+
+.highlight {
+    color: var(--accent) !important;  /* Your brand cyan color */
+}
