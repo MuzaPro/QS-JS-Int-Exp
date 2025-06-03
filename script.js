@@ -44,7 +44,8 @@ const animations = {
     "5-1": "assets/animations/5to1.webm",
     "2-3": "assets/animations/2to3.webm",
     "3-2": "assets/animations/3to2.webm",
-    "3-1": "assets/animations/3to1.webm"
+    "3-1": "assets/animations/3to1.webm",
+    "1-3": "assets/animations/1to3.webm" // Add the new direct animation
 };
 
 // Current state
@@ -203,11 +204,6 @@ async function transitionToState(targetState) {
                 console.log(`Using compound transition: ${currentState} → 1 → ${targetState}`);
                 await performCompoundTransition(currentState, 1, targetState);
             }
-            // For 1->3: go through state 2
-            else if (currentState === 1 && targetState === 3) {
-                console.log(`Using compound transition: ${currentState} → 2 → ${targetState}`);
-                await performCompoundTransition(currentState, 2, targetState);
-            }
             else {
                 // Fallback to instant transition
                 console.log(`No animation found for transition ${currentState}-${targetState}, using instant transition`);
@@ -286,23 +282,16 @@ async function performCompoundTransition(fromState, intermediateState, toState) 
         // Brief pause between animations
         await wait(100);
         
-        // Check if second leg needs a nested compound transition
-        if (intermediateState === 1 && toState === 3) {
-            // Special case: 1→3 needs to go through state 2
-            console.log(`Second leg requires nested compound transition: ${intermediateState} → 2 → ${toState}`);
-            await performCompoundTransition(intermediateState, 2, toState);
+        // Second leg: direct from intermediate to target
+        const secondKey = `${intermediateState}-${toState}`;
+        const secondAnimation = animations[secondKey];
+        
+        if (secondAnimation) {
+            await playTransitionAnimation(secondAnimation, toState);
+            console.log(`Second leg complete: ${intermediateState} → ${toState}`);
         } else {
-            // Standard second leg: direct from intermediate to target
-            const secondKey = `${intermediateState}-${toState}`;
-            const secondAnimation = animations[secondKey];
-            
-            if (secondAnimation) {
-                await playTransitionAnimation(secondAnimation, toState);
-                console.log(`Second leg complete: ${intermediateState} → ${toState}`);
-            } else {
-                await instantTransition(toState);
-                console.log(`Second leg complete (instant): ${intermediateState} → ${toState}`);
-            }
+            await instantTransition(toState);
+            console.log(`Second leg complete (instant): ${intermediateState} → ${toState}`);
         }
         
         console.log(`Compound transition complete: ${fromState} → ${intermediateState} → ${toState}`);
@@ -373,6 +362,7 @@ function playTransitionAnimation(animationPath, targetState) {
                 const tempImg = new Image();
                 tempImg.onload = () => {
                     stateVisual.src = tempImg.src;
+                    adjustPortraitLayout(); // Add this line
                     setTimeout(() => {
                         stateAnimation.classList.remove('playing');
                         resolve();
@@ -477,36 +467,10 @@ window.addEventListener('resize', () => {
 // Also call after image loads or transitions
 stateVisual.addEventListener('load', adjustPortraitLayout);
 
-// Update the image load handlers in transition functions
-function updateToTargetImage() {
-    const newState = states[targetState];
-    if (newState && newState.image) {
-        const tempImg = new Image();
-        tempImg.onload = () => {
-            stateVisual.src = tempImg.src;
-            adjustPortraitLayout(); // Add this line
-            setTimeout(() => {
-                stateAnimation.classList.remove('playing');
-                resolve();
-            }, 50);
-        };
-        tempImg.onerror = () => {
-            console.warn(`Failed to load image: ${newState.image}`);
-            stateAnimation.classList.remove('playing');
-            resolve();
-        };
-        tempImg.src = newState.image;
-    } else {
-        stateAnimation.classList.remove('playing');
-        resolve();
-    }
-}
-
 /* 
  * Transition Logic Summary:
- * Direct transitions: 1↔2, 1↔5, 2↔3, 3→1
+ * Direct transitions: 1↔2, 1↔5, 2↔3, 3→1, 1→3
  * Compound transitions:
- * - 1→3: goes through state 2
  * - 2→5, 3→5: go through state 1 first
  * - 5→2, 5→3: go through state 1 first
  */
