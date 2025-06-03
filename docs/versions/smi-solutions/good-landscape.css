@@ -294,43 +294,57 @@ html, body {
 
 /* MOBILE PORTRAIT Mode - for taller screens */
 @media (max-width: 768px) and (min-height: 740px) {
-    /* Background container fills viewport */
-    .background-container {
-        position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100vw;
-        height: calc(100vh - 60px);
-        z-index: 1;
+    /* Create a scrollable container for the entire view */
+    body {
+        height: 100vh;
+        overflow-x: hidden;
+        overflow-y: auto;
     }
     
-    /* Image anchored to top of container */
-    .state-visual,
-    .state-animation {
-        position: absolute;
+    /* Nav bar stays fixed at top */
+    .mobile-nav-bar {
+        position: fixed;
+        top: 0;
+        z-index: 20;
+    }
+    
+    /* Background container acts as a content wrapper */
+    .background-container {
+        position: relative;
         top: 0;
         left: 0;
-        width: 100%;
+        width: 100vw;
         height: auto;
-        max-height: 65vh;
-        object-fit: contain;
-        object-position: top center;
+        min-height: 100vh;
+        padding-top: 60px; /* Space for fixed nav */
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
     }
     
-    /* Content strip - positioned by JavaScript */
+    /* Image at top of container */
+    .state-visual,
+    .state-animation {
+        position: relative;
+        width: 100%;
+        height: auto;
+        max-height: 60vh; /* Limit image size */
+        object-fit: contain;
+        object-position: top center;
+        flex-shrink: 0;
+    }
+    
+    /* Content strip follows image */
     .mobile-content-strip {
-        position: fixed;
-        left: 0;
-        right: 0;
-        width: 100vw;
+        position: relative;
+        bottom: auto;
+        width: 100%;
+        height: auto;
         background: var(--text-overlay-bg);
-        z-index: 15;
+        z-index: 2;
         padding: 1.25rem;
-        overflow-y: auto;
-        transition: top 0.3s ease;
-        box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.4);
+        margin-top: -4px; /* Slight overlap to prevent gaps */
+        flex-shrink: 0;
     }
 }
 

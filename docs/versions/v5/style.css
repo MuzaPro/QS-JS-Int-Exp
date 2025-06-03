@@ -1,4 +1,4 @@
-/* CSS Variables v13 - Fixed Mobile Layouts */
+/* CSS Variables v11*/
 :root {
     --secondary-bg: #0F282D;
     --main-bg: #183948;
@@ -58,7 +58,7 @@ html, body {
     opacity: 1;
 }
 
-/* Desktop Layout - Default */
+/* Desktop Layout */
 .sidebar {
     position: fixed;
     top: 0;
@@ -109,6 +109,7 @@ html, body {
     fill: currentColor;
 }
 
+/* Make external SVG icons white */
 .nav-icon[src$=".svg"] {
     filter: brightness(0) invert(1);
 }
@@ -135,13 +136,13 @@ html, body {
     font-family: 'Overpass', sans-serif;
     font-weight: 700;
     font-size: 2rem;
-    color: white !important;
+    color: white;
     line-height: 1.2;
     margin-bottom: 1.5rem;
 }
 
 .description {
-    color: rgba(255, 255, 255, 0.9) !important;
+    color: rgba(255, 255, 255, 0.9);
     line-height: 1.6;
     font-size: 1rem;
     margin-bottom: 1rem;
@@ -151,25 +152,28 @@ html, body {
     margin-bottom: 0;
 }
 
+/* Highlight text */
 .highlight {
-    color: var(--accent) !important;
+    color: var(--accent);
     font-weight: 600;
 }
 
-/* Mobile elements - hidden on desktop */
+/* Mobile Navigation Bar - hidden by default */
 .mobile-nav-bar {
     display: none;
 }
 
+/* Mobile Content Strip - hidden by default */
 .mobile-content-strip {
     display: none;
 }
 
+/* Utility Icons - hidden on desktop */
 .utility-menu {
     display: none;
 }
 
-/* Tablet Layout */
+/* Tablet Responsive */
 @media (max-width: 1024px) {
     .sidebar {
         width: 35vw;
@@ -188,14 +192,36 @@ html, body {
     }
 }
 
-/* MOBILE LAYOUTS - General mobile styles first */
+/* Mobile Layout */
 @media (max-width: 768px) {
-    /* Hide desktop sidebar on all mobile */
+    /* Hide desktop sidebar completely */
     .sidebar {
         display: none;
     }
     
-    /* Mobile nav bar styling */
+    /* Background visual positioning for mobile - stick to nav bar */
+    .background-container {
+        top: 60px; /* Directly below nav bar */
+        left: 0;
+        right: 0;
+        bottom: 180px; /* Leave exact space for text content */
+        width: 100vw;
+        height: auto; /* Let it fill the space naturally */
+        margin: 0;
+        padding: 0;
+    }
+    
+    .state-visual {
+        object-fit: contain;
+        object-position: center top; /* Stick to top of container */
+    }
+    
+    .state-animation {
+        object-fit: contain;
+        object-position: center top; /* Stick to top of container */
+    }
+    
+    /* Horizontal Navigation Bar at Top */
     .mobile-nav-bar {
         display: flex;
         position: fixed;
@@ -204,7 +230,7 @@ html, body {
         width: 100vw;
         height: 60px;
         background: var(--menu-bar);
-        z-index: 20;
+        z-index: 10;
         align-items: center;
         justify-content: space-around;
         border-bottom: 1px solid rgba(62, 193, 201, 0.2);
@@ -228,6 +254,7 @@ html, body {
     
     .mobile-nav-bar .nav-item:hover {
         background: rgba(62, 193, 201, 0.1);
+        padding-left: 0.5rem;
     }
     
     .mobile-nav-bar .nav-item.active {
@@ -252,39 +279,42 @@ html, body {
         font-weight: 500;
     }
     
-    /* Mobile content strip styling */
+    /* Mobile Content Area - anchor directly to visual content */
     .mobile-content-strip {
         display: block;
         position: fixed;
-        bottom: 0;
+        bottom: 0; /* Stick to bottom */
         left: 0;
         right: 0;
         width: 100vw;
+        height: 180px; /* Fixed height */
         background: var(--text-overlay-bg);
-        z-index: 15;
-        padding: 1.25rem;
+        z-index: 10;
+        padding: 1.25rem 1.25rem 1.5rem 1.25rem;
         overflow-y: auto;
         transition: opacity 0.3s ease;
-        box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.4);
+        margin: 0; /* Remove any default margins */
+        border: none; /* Remove any borders */
     }
     
     .mobile-content-strip.fade-out {
         opacity: 0;
     }
     
+    /* Larger fonts for mobile content */
     .mobile-content-strip .main-title {
-        font-size: 1.3rem;
+        font-size: 1.4rem; /* Increased from 1.25rem */
         margin-bottom: 0.75rem;
         line-height: 1.2;
-        color: white !important;
+        color: white;
         font-weight: 700;
     }
     
     .mobile-content-strip .description {
-        font-size: 0.95rem;
+        font-size: 1rem; /* Increased from 0.9rem */
         line-height: 1.5;
         margin-bottom: 0.5rem;
-        color: rgba(255, 255, 255, 0.9) !important;
+        color: rgba(255, 255, 255, 0.9);
     }
     
     .mobile-content-strip .description:last-child {
@@ -292,196 +322,25 @@ html, body {
     }
 }
 
-/* MOBILE PORTRAIT Mode - for taller screens */
-@media (max-width: 768px) and (min-height: 740px) {
-    /* Background container fills viewport */
+/* Extra small mobile devices */
+@media (max-width: 480px) {
     .background-container {
-        position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100vw;
-        height: calc(100vh - 60px);
-        z-index: 1;
-    }
-    
-    /* Image anchored to top of container */
-    .state-visual,
-    .state-animation {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: auto;
-        max-height: 65vh;
-        object-fit: contain;
-        object-position: top center;
-    }
-    
-    /* Content strip - positioned by JavaScript */
-    .mobile-content-strip {
-        position: fixed;
-        left: 0;
-        right: 0;
-        width: 100vw;
-        background: var(--text-overlay-bg);
-        z-index: 15;
-        padding: 1.25rem;
-        overflow-y: auto;
-        transition: top 0.3s ease;
-        box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.4);
-    }
-}
-
-/* LANDSCAPE Mode - When height < 740px */
-@media (max-width: 1024px) and (max-height: 740px) {
-    /* Hide portrait mobile elements */
-    .mobile-nav-bar {
-        display: none !important;
+        bottom: 160px; /* Adjust for smaller text area */
     }
     
     .mobile-content-strip {
-        display: none !important;
+        height: 160px;
     }
     
-    /* Show landscape sidebar */
-    .sidebar {
-        display: flex !important;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 12vw;
-        min-width: 80px;
-        height: 100vh;
-        background: var(--menu-bar);
-        z-index: 10;
-        flex-direction: column;
-        border-right: 1px solid rgba(62, 193, 201, 0.2);
+    .mobile-content-strip .main-title {
+        font-size: 1.2rem;
     }
     
-    .sidebar .nav-menu {
-        padding: 1rem 0;
-        border-bottom: none;
-        background: transparent;
-    }
-    
-    .sidebar .nav-item {
-        flex-direction: column;
-        padding: 0.75rem 0.5rem;
-        text-align: center;
-        margin-right: 0;
-    }
-    
-    .sidebar .nav-item:hover {
-        padding-left: 0.5rem;
-    }
-    
-    .sidebar .nav-item.active {
-        border-right: none;
-        border-left: 3px solid var(--accent);
-    }
-    
-    .sidebar .nav-icon {
-        margin-right: 0;
-        margin-bottom: 0.25rem;
-        width: 20px;
-        height: 20px;
-    }
-    
-    .sidebar .nav-text {
-        font-size: 0.65rem;
-        line-height: 1;
-    }
-    
-    /* Hide sidebar's content area */
-    .sidebar .content-area {
-        display: none;
-    }
-    
-    /* Show desktop content area in middle */
-    .content-area {
-        display: block !important;
-        position: fixed;
-        top: 0;
-        left: 12vw;
-        width: 35vw;
-        height: 100vh;
-        padding: 2rem 1.5rem;
-        overflow-y: auto;
-        background: var(--text-overlay-bg);
-        z-index: 5;
-    }
-    
-    .content-area .main-title {
-        font-size: 1.4rem;
-        margin-bottom: 1rem;
-    }
-    
-    .content-area .description {
+    .mobile-content-strip .description {
         font-size: 0.9rem;
-        line-height: 1.5;
-    }
-    
-    /* Background on right side for landscape */
-    .background-container {
-        position: fixed;
-        left: 47vw;
-        right: 0;
-        top: 0;
-        height: 100vh;
-        width: 53vw;
-        z-index: 1;
-        display: block;
-    }
-    
-    /* Reset visual positioning for landscape */
-    .state-visual,
-    .state-animation {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-        max-height: none;
-    }
-}
-
-/* Small devices portrait adjustments */
-@media (max-width: 480px) and (min-height: 740px) {
-    .mobile-nav-bar {
-        height: 50px;
-    }
-    
-    .mobile-nav-bar .nav-icon {
-        width: 18px;
-        height: 18px;
     }
     
     .mobile-nav-bar .nav-text {
         font-size: 0.65rem;
-    }
-    
-    .background-container {
-        top: 50px;
-        height: calc(100vh - 50px);
-    }
-    
-    .state-visual,
-    .state-animation {
-        max-height: calc(100vh - 50px - 180px); /* Adjusted for smaller nav */
-    }
-    
-    .mobile-content-strip {
-        max-height: 40vh;
-        padding: 1rem;
-    }
-    
-    .mobile-content-strip .main-title {
-        font-size: 1.15rem;
-    }
-    
-    .mobile-content-strip .description {
-        font-size: 0.85rem;
     }
 }

@@ -76,21 +76,6 @@ const mobileDescription2 = document.getElementById('mobileDescription2');
 const allNavItems = document.querySelectorAll('.nav-item');
 const audioToggleBtn = document.querySelector('.utility-btn[title="Audio"]');
 
-// Detect current layout mode
-function getLayoutMode() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const aspectRatio = width / height;
-    
-    if (width > 768) {
-        return 'desktop';
-    } else if (width <= 768 && aspectRatio > 1.3) {
-        return 'landscape';
-    } else {
-        return 'portrait';
-    }
-}
-
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
     setupNavListeners();
@@ -215,19 +200,13 @@ async function transitionToState(targetState) {
             }
         }
 
-        // Fade out current content based on layout mode
-        const layoutMode = getLayoutMode();
-        
-        if (layoutMode === 'portrait') {
-            if (mobileContentArea) {
-                mobileContentArea.classList.add('fade-out');
-            }
-        } else { // desktop or landscape
-            if (contentArea) {
-                contentArea.classList.add('fade-out');
-            }
+        // Fade out current content (both desktop and mobile)
+        if (contentArea) {
+            contentArea.classList.add('fade-out');
         }
-        
+        if (mobileContentArea) {
+            mobileContentArea.classList.add('fade-out');
+        }
         await wait(300);
 
         // Update content
@@ -239,15 +218,12 @@ async function transitionToState(targetState) {
         // Update nav state
         updateActiveNav();
 
-        // Fade in new content
-        if (layoutMode === 'portrait') {
-            if (mobileContentArea) {
-                mobileContentArea.classList.remove('fade-out');
-            }
-        } else { // desktop or landscape
-            if (contentArea) {
-                contentArea.classList.remove('fade-out');
-            }
+        // Fade in new content (both desktop and mobile)
+        if (contentArea) {
+            contentArea.classList.remove('fade-out');
+        }
+        if (mobileContentArea) {
+            mobileContentArea.classList.remove('fade-out');
         }
     } catch (error) {
         console.error('Transition error:', error);
@@ -321,10 +297,6 @@ function instantTransition(targetState) {
             const tempImg = new Image();
             tempImg.onload = () => {
                 stateVisual.src = tempImg.src;
-                // Adjust portrait layout after image loads
-                setTimeout(() => {
-                    adjustPortraitLayout();
-                }, 50);
                 resolve();
             };
             tempImg.onerror = () => {
@@ -397,32 +369,26 @@ function updateContent(stateId) {
     const state = states[stateId];
     if (!state) return;
 
-    const layoutMode = getLayoutMode();
-
-    // Update desktop/landscape content
-    if (layoutMode === 'desktop' || layoutMode === 'landscape') {
-        if (mainTitle) {
-            mainTitle.innerHTML = state.title;
-        }
-        if (description1) {
-            description1.innerHTML = state.descriptions[0] || '';
-        }
-        if (description2) {
-            description2.innerHTML = state.descriptions[1] || '';
-        }
+    // Update desktop content
+    if (mainTitle) {
+        mainTitle.innerHTML = state.title;
+    }
+    if (description1) {
+        description1.innerHTML = state.descriptions[0] || '';
+    }
+    if (description2) {
+        description2.innerHTML = state.descriptions[1] || '';
     }
 
-    // Update mobile portrait content
-    if (layoutMode === 'portrait') {
-        if (mobileMainTitle) {
-            mobileMainTitle.innerHTML = state.title;
-        }
-        if (mobileDescription1) {
-            mobileDescription1.innerHTML = state.descriptions[0] || '';
-        }
-        if (mobileDescription2) {
-            mobileDescription2.innerHTML = state.descriptions[1] || '';
-        }
+    // Update mobile content
+    if (mobileMainTitle) {
+        mobileMainTitle.innerHTML = state.title;
+    }
+    if (mobileDescription1) {
+        mobileDescription1.innerHTML = state.descriptions[0] || '';
+    }
+    if (mobileDescription2) {
+        mobileDescription2.innerHTML = state.descriptions[1] || '';
     }
 }
 
@@ -437,70 +403,6 @@ window.addEventListener('popstate', (event) => {
         transitionToState(event.state.stateId);
     }
 });
-
-// Function to adjust portrait layout
-function adjustPortraitLayout() {
-    const layoutMode = getLayoutMode();
-    
-    if (layoutMode === 'portrait') {
-        const mobileContentStrip = document.querySelector('.mobile-content-strip');
-        const stateVisual = document.getElementById('stateVisual');
-        const mobileNavBar = document.querySelector('.mobile-nav-bar');
-        
-        if (mobileContentStrip && stateVisual && mobileNavBar) {
-            // Get the height of the nav bar
-            const navHeight = mobileNavBar.offsetHeight;
-            
-            // Get the displayed height of the image
-            const imageRect = stateVisual.getBoundingClientRect();
-            const imageBottom = imageRect.bottom;
-            
-            // Position content strip right after the image
-            mobileContentStrip.style.position = 'fixed';
-            mobileContentStrip.style.top = imageBottom + 'px';
-            mobileContentStrip.style.bottom = 'auto';
-            mobileContentStrip.style.maxHeight = `calc(100vh - ${imageBottom}px - 20px)`;
-        }
-    }
-}
-
-// Call on load and resize
-window.addEventListener('load', adjustPortraitLayout);
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-        adjustPortraitLayout();
-        updateContent(currentState);
-    }, 250);
-});
-
-// Also call after image loads or transitions
-stateVisual.addEventListener('load', adjustPortraitLayout);
-
-// Update the image load handlers in transition functions
-function updateToTargetImage() {
-    const newState = states[targetState];
-    if (newState && newState.image) {
-        const tempImg = new Image();
-        tempImg.onload = () => {
-            stateVisual.src = tempImg.src;
-            adjustPortraitLayout(); // Add this line
-            setTimeout(() => {
-                stateAnimation.classList.remove('playing');
-                resolve();
-            }, 50);
-        };
-        tempImg.onerror = () => {
-            console.warn(`Failed to load image: ${newState.image}`);
-            stateAnimation.classList.remove('playing');
-            resolve();
-        };
-        tempImg.src = newState.image;
-    } else {
-        stateAnimation.classList.remove('playing');
-        resolve();
-    }
-}
 
 /* 
  * Transition Logic Summary:
