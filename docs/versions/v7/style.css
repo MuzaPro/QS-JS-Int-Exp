@@ -563,23 +563,14 @@ html, body {
     }
 }
 
-/* Portrait mode - show full visuals without cropping */
+/* Portrait mode */
 @media (max-width: 768px) and (orientation: portrait) {
     .state-visual,
     .state-animation {
-        position: absolute !important;
         top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: auto !important; /* Let height adjust based on aspect ratio */
+        height: 60vh !important;
         max-height: 60vh !important;
-        object-fit: contain !important; /* Show entire image without cropping */
-        object-position: center top !important;
-    }
-    
-    /* Optional: Add a background color to fill empty space */
-    .background-container {
-        background-color: #09181F; 
+        object-position: center 25% !important;
     }
 }
 
