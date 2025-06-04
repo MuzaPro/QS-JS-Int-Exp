@@ -294,57 +294,43 @@ html, body {
 
 /* MOBILE PORTRAIT Mode - for taller screens */
 @media (max-width: 768px) and (min-height: 740px) {
-    /* Create a scrollable container for the entire view */
-    body {
-        height: 100vh;
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-    
-    /* Nav bar stays fixed at top */
-    .mobile-nav-bar {
-        position: fixed;
-        top: 0;
-        z-index: 20;
-    }
-    
-    /* Background container acts as a content wrapper */
+    /* Background container fills viewport */
     .background-container {
-        position: relative;
-        top: 0;
+        position: fixed;
+        top: 60px;
         left: 0;
+        right: 0;
+        bottom: 0;
         width: 100vw;
-        height: auto;
-        min-height: 100vh;
-        padding-top: 60px; /* Space for fixed nav */
+        height: calc(100vh - 60px);
         z-index: 1;
-        display: flex;
-        flex-direction: column;
     }
     
-    /* Image at top of container */
+    /* Image anchored to top of container */
     .state-visual,
     .state-animation {
-        position: relative;
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: auto;
-        max-height: 60vh; /* Limit image size */
+        max-height: 65vh;
         object-fit: contain;
         object-position: top center;
-        flex-shrink: 0;
     }
     
-    /* Content strip follows image */
+    /* Content strip - positioned by JavaScript */
     .mobile-content-strip {
-        position: relative;
-        bottom: auto;
-        width: 100%;
-        height: auto;
+        position: fixed;
+        left: 0;
+        right: 0;
+        width: 100vw;
         background: var(--text-overlay-bg);
-        z-index: 2;
+        z-index: 15;
         padding: 1.25rem;
-        margin-top: -4px; /* Slight overlap to prevent gaps */
-        flex-shrink: 0;
+        overflow-y: auto;
+        transition: top 0.3s ease;
+        box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.4);
     }
 }
 

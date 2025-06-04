@@ -6,7 +6,7 @@ const states = {
         title: "Introduction to Modestly Sized Quantum Computers",
         descriptions: [
             "Welcome to the future of quantum computing. Instead of requiring factory-sized facilities, our technology will bring universal quantum computers to your laboratory.",
-            "Use the navigation buttons above to explore the conceptual structure of a quantum computer that fits in your room (instead of <em>being</em> the room)."
+            "<span class='highlight'>Use the navigation buttons above</span> to explore the conceptual structure of a quantum computer that fits in your room (instead of <em>being</em> the room)."
         ],
         image: "assets/images/state1-static.webp"
     },
@@ -14,12 +14,12 @@ const states = {
         title: "Quantum System Components",
         descriptions: [
             "Our quantum computer consists of three main components: the vacuum chamber housing the qubits, optical fiber memory for photon storage, and classical processing unit.",
-            "This <span class='highlight'>deterministic approach</span> eliminates the massive resource overhead of probabilistic systems, making quantum computing accessible and practical."
+            "This small form factor is made possible thanks to our <span class='highlight'>deterministic approach</span>, which eliminates the massive resource overhead of probabilistic systems, making quantum computing accessible and practical."
         ],
         image: "assets/images/state2-static.webp"
     },
     3: {
-        title: "Room Temperature Advantage",
+        title: "Vacuum Chamber",
         descriptions: [
             "Unlike competing technologies requiring extreme cooling, our <span class='highlight'>vacuum chamber operates at room temperature</span>, dramatically reducing infrastructure costs.",
             "The rubidium atoms are perfectly isolated from environmental noise while remaining accessible for precise manipulation and measurement."
@@ -27,10 +27,10 @@ const states = {
         image: "assets/images/state3-static.webp"
     },
     5: {
-        title: "Breakthrough Technology",
+        title: "Photonic Quantum Computing",
         descriptions: [
-            "Our <span class='highlight'>photon-atom integration</span> achieves deterministic quantum operations with 10,000x greater efficiency than probabilistic approaches.",
-            "This technology enables the construction of million-qubit systems in compact form factors, bringing practical quantum computing within reach of enterprises and governments worldwide."
+            "this approach utilizes <span class='highlight'>individual photons as qubits,</span>  to carry out quantum operations at room temperature. ", 
+            "By leveraging low-loss waveguides and existing fiber networks, this approach offers scalability and low-decoherence pathways toward large-scale quantum processors."
         ],
         image: "assets/images/state5-static.webp"
     }
@@ -45,12 +45,13 @@ const animations = {
     "2-3": "assets/animations/2to3.webm",
     "3-2": "assets/animations/3to2.webm",
     "3-1": "assets/animations/3to1.webm",
-    "1-3": "assets/animations/1to3.webm" // Add the new direct animation
+    "1-3": "assets/animations/1to3.webm" 
 };
 
 // Current state
 let currentState = 1;
 let isTransitioning = false;
+let resizeTimeout; 
 
 // Audio configuration
 let soundEnabled = true;
@@ -98,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAudioListeners();
     preloadAnimations();
     updateActiveNav();
+    updateContent(currentState);
 });
 
 // Setup audio button listeners
@@ -156,6 +158,11 @@ function preloadAnimations() {
         const video = document.createElement('video');
         video.src = path;
         video.preload = 'auto';
+        video.muted = true;
+        video.playsInline = true;
+        video.setAttribute('webkit-playsinline', '');
+        video.setAttribute('disablePictureInPicture', '');
+        video.setAttribute('controls', 'false');
         video.onerror = () => {
             console.warn(`Unable to preload animation: ${path}`);
         };
