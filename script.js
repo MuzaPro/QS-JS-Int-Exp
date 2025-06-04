@@ -100,6 +100,26 @@ document.addEventListener('DOMContentLoaded', () => {
     preloadAnimations();
     updateActiveNav();
     updateContent(currentState);
+    
+    // Prevent any interaction with background elements
+    const backgroundContainer = document.querySelector('.background-container');
+    const stateVisual = document.getElementById('stateVisual');
+    const stateAnimation = document.getElementById('stateAnimation');
+    
+    const elements = [backgroundContainer, stateVisual, stateAnimation];
+    const events = ['click', 'dblclick', 'contextmenu', 'mousedown', 'touchstart'];
+    
+    elements.forEach(element => {
+        if (element) {
+            events.forEach(event => {
+                element.addEventListener(event, e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }, { passive: false });
+            });
+        }
+    });
 });
 
 // Setup audio button listeners

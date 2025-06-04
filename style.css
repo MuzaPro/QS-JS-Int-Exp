@@ -58,6 +58,22 @@ html, body {
     opacity: 1;
 }
 
+/* Make background elements completely non-interactive */
+.background-container,
+.state-visual,
+.state-animation {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent double-tap zooming */
+.background-container {
+    touch-action: none;
+}
+
 /* Desktop Layout - Default */
 .sidebar {
     position: fixed;
