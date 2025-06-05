@@ -2,6 +2,8 @@
 
 An interactive web application showcasing Quantum Source's revolutionary photonic quantum computing technology through an immersive visual experience.
 
+![Quantum Source Interactive Experience](assets/images/screenshot.jpg)
+
 ## 🚀 Project Overview
 
 This is a state-driven web application that simulates exploring a quantum computing laboratory. Users navigate through different views using pre-rendered animations and static images, creating the illusion of 3D navigation while maintaining high performance across all devices.

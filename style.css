@@ -514,6 +514,13 @@ html, body {
     z-index: 5; /* Above videos but below UI elements */
     cursor: pointer; /* Shows a hand cursor to indicate clickability */
     pointer-events: auto; /* Allows clicks to pass through */
+
+    -webkit-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    outline: none !important;
 }
 
 /* Force alignment between static images and animations regardless of media queries */
@@ -579,7 +586,15 @@ html, body {
     
     /* Optional: Add a background color to fill empty space */
     .background-container {
-        background-color: #09181F; 
+        background-color: #09181F;
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-touch-callout: none !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -ms-user-select: none !important;
+        outline: none !important;
+         
     }
 }
 
