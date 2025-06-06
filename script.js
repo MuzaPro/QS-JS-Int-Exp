@@ -86,7 +86,7 @@ function getLayoutMode() {
     
     if (width > 768) {
         return 'desktop';
-    } else if (width <= 768 && aspectRatio > 1.3) {
+    } else if (width <= 768 && window.matchMedia('(orientation: landscape)').matches) {
         return 'landscape';
     } else {
         return 'portrait';

@@ -312,7 +312,7 @@ html, body {
 }
 
 /* MOBILE PORTRAIT Mode - for taller screens */
-@media (max-width: 768px) and (min-height: 740px) {
+@media (max-width: 768px) and (orientation: portrait) {
     /* Background container fills viewport */
     .background-container {
         position: fixed;
@@ -354,7 +354,7 @@ html, body {
 }
 
 /* LANDSCAPE Mode - When height < 740px */
-@media (max-width: 1024px) and (max-height: 740px) {
+@media (max-width: 1024px) and (orientation: landscape) {
     /* Hide portrait mobile elements */
     .mobile-nav-bar {
         display: none !important;

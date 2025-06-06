@@ -1,25 +1,32 @@
-
 ## Option 1: Embed as Custom Code Block (Recommended for Beginners)
 
 This is the easiest approach and will work well for your interactive experience.
 
 ### Step 1: Prepare Your Assets
+
 First, you'll need to host your assets (images, videos, audio) somewhere accessible:
 
 **Option A: Use a CDN service like:**
+
 - Cloudinary (free tier available)
 - AWS S3 + CloudFront
 - Netlify (free hosting)
 
 **Option B: Upload to Webflow Assets (Limited)**
+
 - Webflow allows some asset uploads, but has size limits
 
 ### Step 2: Create a Dedicated Page in Webflow
+
 1. In Webflow Designer, create a new page (e.g., "quantum-experience")
 2. Add a **Custom Code** component to the page
 3. Set the page to full width/height
 
-### Step 3: Modify Your Code for Webflow### Step 4: Upload Assets and Update URLs
+### Step 3: Modify Your Code for Webflow
+
+
+
+### Step 4: Upload Assets and Update URLs
 
 1. **Upload your assets** to a CDN service
 2. **Replace all the placeholder URLs** in the code above:
@@ -30,6 +37,7 @@ First, you'll need to host your assets (images, videos, audio) somewhere accessi
 ### Step 5: Add Google Fonts to Webflow
 
 In Webflow Designer:
+
 1. Go to Project Settings → Custom Code
 2. Add this to the `<head>` section:
 
@@ -77,14 +85,18 @@ For a more integrated feel, you can trigger the experience as an overlay:
 ## Asset Hosting Recommendations
 
 ### For Free Hosting:
+
 **Netlify** (Recommended for beginners):
+
 1. Create account at netlify.com
 2. Drag & drop your assets folder
 3. Copy the URLs
 4. Update your code
 
 ### For CDN (Better Performance):
+
 **Cloudinary**:
+
 1. Sign up for free account
 2. Upload images/videos through their interface
 3. Use their optimized URLs
@@ -108,4 +120,3 @@ For a more integrated feel, you can trigger the experience as an overlay:
 - [ ] Check mobile responsiveness
 - [ ] Verify animations load properly
 - [ ] Test the close button functionality
-
