@@ -206,7 +206,7 @@ function playButtonSound() {
 }
 
 // Main transition function
-async function transitionToState(targetState) {
+async function transitionToState(targetState, isCompoundSegment = false) {
     if (isTransitioning || targetState === currentState || !states[targetState]) return;
 
     isTransitioning = true;
@@ -215,6 +215,12 @@ async function transitionToState(targetState) {
     const animationPath = animations[key];
     
     try {
+        // Start content transition immediately (unless this is part of a compound transition)
+        if (!isCompoundSegment) {
+            // Start text transition animation
+            startTextTransition(currentState, targetState);
+        }
+        
         // Check if direct animation exists
         if (animationPath) {
             console.log(`Playing direct transition: ${currentState} → ${targetState}`);
@@ -241,55 +247,79 @@ async function transitionToState(targetState) {
             }
         }
 
-        // Fade out current content based on layout mode
-        const layoutMode = getLayoutMode();
-        
-        if (layoutMode === 'portrait') {
-            if (mobileContentArea) {
-                mobileContentArea.classList.add('fade-out');
-            }
-        } else { // desktop or landscape
-            if (contentArea) {
-                contentArea.classList.add('fade-out');
-            }
-        }
-        
-        await wait(300);
-
-        // Update content
-        updateContent(targetState);
-
         // Update state
         currentState = targetState;
 
         // Update nav state
         updateActiveNav();
 
-        // Fade in new content
-        if (layoutMode === 'portrait') {
-            if (mobileContentArea) {
-                mobileContentArea.classList.remove('fade-out');
-            }
-        } else { // desktop or landscape
-            if (contentArea) {
-                contentArea.classList.remove('fade-out');
-            }
-        }
     } catch (error) {
         console.error('Transition error:', error);
         // Recovery in case of error
         updateContent(targetState);
         currentState = targetState;
         updateActiveNav();
-        if (contentArea) {
-            contentArea.classList.remove('fade-out');
-        }
-        if (mobileContentArea) {
-            mobileContentArea.classList.remove('fade-out');
-        }
     } finally {
         isTransitioning = false;
     }
+}
+
+// Start text transition effect
+function startTextTransition(fromState, toState) {
+    const fromStateData = states[fromState];
+    const toStateData = states[toState];
+    
+    if (!fromStateData || !toStateData) return;
+    
+    const layoutMode = getLayoutMode();
+    
+    // Choose which content elements to animate based on layout
+    let titleElement, desc1Element, desc2Element;
+    
+    if (layoutMode === 'portrait') {
+        titleElement = mobileMainTitle;
+        desc1Element = mobileDescription1;
+        desc2Element = mobileDescription2;
+    } else { // desktop or landscape
+        titleElement = mainTitle;
+        desc1Element = description1;
+        desc2Element = description2;
+    }
+    
+    // Animate the title transition
+    if (titleElement) {
+        fadeTextTransition(titleElement, fromStateData.title, toStateData.title);
+    }
+    
+    // Animate the first description
+    if (desc1Element && fromStateData.descriptions[0] && toStateData.descriptions[0]) {
+        fadeTextTransition(desc1Element, fromStateData.descriptions[0], toStateData.descriptions[0]);
+    }
+    
+    // Animate the second description
+    if (desc2Element && fromStateData.descriptions[1] && toStateData.descriptions[1]) {
+        fadeTextTransition(desc2Element, fromStateData.descriptions[1], toStateData.descriptions[1]);
+    }
+}
+
+// Create a smooth fade transition between two text contents
+function fadeTextTransition(element, fromText, toText) {
+    // Create a wrapper if it doesn't exist
+    let wrapper = element.querySelector('.text-transition-wrapper');
+    if (!wrapper) {
+        element.innerHTML = `<div class="text-transition-wrapper">${element.innerHTML}</div>`;
+        wrapper = element.querySelector('.text-transition-wrapper');
+    }
+    
+    // Fade out
+    wrapper.style.transition = 'opacity 0.3s ease-out';
+    wrapper.style.opacity = '0';
+    
+    // After fade out, update content and fade back in
+    setTimeout(() => {
+        wrapper.innerHTML = toText;
+        wrapper.style.opacity = '1';
+    }, 300);
 }
 
 // Compound transition through intermediate state
@@ -297,15 +327,18 @@ async function performCompoundTransition(fromState, intermediateState, toState) 
     console.log(`Starting compound transition: ${fromState} → ${intermediateState} → ${toState}`);
     
     try {
-        // First leg: from current to intermediate
+        // Start text transition from current state to target state (skip intermediate)
+        startTextTransition(fromState, toState);
+        
+        // First leg: from current to intermediate (passing true to indicate this is part of compound)
         const firstKey = `${fromState}-${intermediateState}`;
         const firstAnimation = animations[firstKey];
         
         if (firstAnimation) {
-            await playTransitionAnimation(firstAnimation, intermediateState);
+            await playTransitionAnimation(firstAnimation, intermediateState, true);
             console.log(`First leg complete: ${fromState} → ${intermediateState}`);
         } else {
-            await instantTransition(intermediateState);
+            await instantTransition(intermediateState, true);
             console.log(`First leg complete (instant): ${fromState} → ${intermediateState}`);
         }
         
@@ -317,10 +350,10 @@ async function performCompoundTransition(fromState, intermediateState, toState) 
         const secondAnimation = animations[secondKey];
         
         if (secondAnimation) {
-            await playTransitionAnimation(secondAnimation, toState);
+            await playTransitionAnimation(secondAnimation, toState, true);
             console.log(`Second leg complete: ${intermediateState} → ${toState}`);
         } else {
-            await instantTransition(toState);
+            await instantTransition(toState, true);
             console.log(`Second leg complete (instant): ${intermediateState} → ${toState}`);
         }
         
@@ -333,13 +366,18 @@ async function performCompoundTransition(fromState, intermediateState, toState) 
 }
 
 // Instant transition fallback when no animation exists
-function instantTransition(targetState) {
+function instantTransition(targetState, isCompoundSegment = false) {
     return new Promise((resolve) => {
         const newState = states[targetState];
         if (newState && newState.image) {
             const tempImg = new Image();
             tempImg.onload = () => {
                 stateVisual.src = tempImg.src;
+                // Only update content if this isn't part of a compound transition
+                if (!isCompoundSegment) {
+                    // Since this is instant, directly update content
+                    updateContent(targetState);
+                }
                 // Adjust portrait layout after image loads
                 setTimeout(() => {
                     adjustPortraitLayout();
@@ -358,7 +396,7 @@ function instantTransition(targetState) {
 }
 
 // Play transition animation
-function playTransitionAnimation(animationPath, targetState) {
+function playTransitionAnimation(animationPath, targetState, isCompoundSegment = false) {
     return new Promise((resolve, reject) => {
         stateAnimation.src = animationPath;
 
@@ -383,7 +421,7 @@ function playTransitionAnimation(animationPath, targetState) {
         stateAnimation.onerror = () => {
             console.error(`Failed to load animation: ${animationPath}`);
             // Fallback to instant transition
-            instantTransition(targetState).then(resolve).catch(reject);
+            instantTransition(targetState, isCompoundSegment).then(resolve).catch(reject);
         };
 
         function updateToTargetImage() {
@@ -392,7 +430,12 @@ function playTransitionAnimation(animationPath, targetState) {
                 const tempImg = new Image();
                 tempImg.onload = () => {
                     stateVisual.src = tempImg.src;
-                    adjustPortraitLayout(); // Add this line
+                    // Only update content if this isn't part of a compound transition
+                    if (!isCompoundSegment) {
+                        // Ensure content matches the target state
+                        updateContent(targetState);
+                    }
+                    adjustPortraitLayout();
                     setTimeout(() => {
                         stateAnimation.classList.remove('playing');
                         resolve();

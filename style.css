@@ -505,6 +505,11 @@ html, body {
     }
 }
 
+/* Text transition effects */
+.text-transition-wrapper {
+    transition: opacity 0.3s ease-in-out;
+}
+
 .click-capture-layer {
     position: absolute;
     top: 0;
