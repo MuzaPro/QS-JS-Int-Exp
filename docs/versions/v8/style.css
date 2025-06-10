@@ -1,4 +1,4 @@
-/* CSS Variables v13 - Fixed Mobile Layouts with Performance Optimizations */
+/* CSS Variables v13 - Fixed Mobile Layouts */
 :root {
     --secondary-bg: #0F282D;
     --main-bg: #183948;
@@ -21,9 +21,6 @@ html, body {
     font-family: 'Overpass', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow: hidden;
     background: var(--menu-bar);
-    /* Optimize touch responsiveness */
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
 }
 
 /* Full Screen Background Container */
@@ -42,7 +39,6 @@ html, body {
     height: 100%;
     object-fit: cover;
     object-position: center;
-    will-change: transform;
 }
 
 .state-animation {
@@ -54,9 +50,8 @@ html, body {
     object-fit: cover;
     object-position: center;
     opacity: 0;
-    transition: opacity 0.1s ease;
+    transition: opacity 0.3s ease;
     z-index: 2;
-    will-change: opacity;
 }
 
 .state-animation.playing {
@@ -108,40 +103,12 @@ html, body {
     padding: 1rem 2rem;
     color: white;
     text-decoration: none;
-    transition: background-color 0.1s ease, padding-left 0.15s ease, transform 0.05s ease;
+    transition: all 0.3s ease;
     border: none;
     background: none;
     width: 100%;
     cursor: pointer;
     font-family: inherit;
-    position: relative;
-    overflow: hidden;
-    transform: scale(1);
-}
-
-/* Immediate press feedback */
-.nav-item:active {
-    transform: scale(0.97);
-    transition: transform 0.05s ease;
-}
-
-/* Ripple effect for immediate feedback */
-.nav-item::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.4s ease, height 0.4s ease;
-}
-
-.nav-item.ripple::before {
-    width: 300px;
-    height: 300px;
 }
 
 .nav-item:hover {
@@ -176,7 +143,7 @@ html, body {
     padding: 3rem 2rem;
     background: var(--text-overlay-bg);
     overflow-y: auto;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.3s ease;
 }
 
 .content-area.fade-out {
@@ -272,14 +239,10 @@ html, body {
         border: none;
         cursor: pointer;
         font-family: inherit;
-        transition: all 0.1s ease;
+        transition: all 0.3s ease;
         flex: 1;
         gap: 0.25rem;
         margin-right: 0;
-    }
-    
-    .mobile-nav-bar .nav-item:active {
-        transform: scale(0.95);
     }
     
     .mobile-nav-bar .nav-item:hover {
@@ -320,7 +283,7 @@ html, body {
         z-index: 15;
         padding: 1.25rem;
         overflow-y: auto;
-        transition: opacity 0.2s ease;
+        transition: opacity 0.3s ease;
         box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.4);
     }
     
@@ -544,7 +507,7 @@ html, body {
 
 /* Text transition effects */
 .text-transition-wrapper {
-    transition: opacity 0.2s ease-in-out;
+    transition: opacity 0.3s ease-in-out;
 }
 
 .click-capture-layer {
@@ -581,7 +544,7 @@ html, body {
 /* Keep other properties for animations */
 .state-animation {
     opacity: 0;
-    transition: opacity 0.1s ease;
+    transition: opacity 0.3s ease;
     z-index: 2;
 }
 
@@ -592,7 +555,6 @@ html, body {
     user-select: none;
     -webkit-user-select: none;
 }
-
 /* FINAL OVERRIDE FOR ALL MEDIA QUERIES - ADD AT END OF FILE */
 .state-visual,
 .state-animation {
@@ -637,6 +599,7 @@ html, body {
         -webkit-user-select: none !important;
         -ms-user-select: none !important;
         outline: none !important;
+         
     }
 }
 
@@ -650,66 +613,4 @@ html, body {
     z-index: 10 !important;
     cursor: pointer !important;
     pointer-events: auto !important;
-}
-
-/* Performance optimizations */
-.nav-item,
-.state-visual,
-.state-animation,
-.content-area {
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-}
-
-/* Attribution styling */
-.attribution {
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: right;
-    font-weight: 300;
-}
-
-.attribution-icon {
-    height: 12px;
-    vertical-align: middle;
-    margin: 0 2px;
-    opacity: 0.7;
-}
-
-.attribution-link {
-    color: rgba(255, 255, 255, 0.6);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-.attribution-link:hover {
-    color: var(--accent);
-    text-decoration: underline;
-}
-
-/* Mobile adjustments for attribution */
-@media (max-width: 768px) {
-    .attribution {
-        font-size: 0.65rem;
-        margin-top: 1.5rem;
-        padding-top: 0.75rem;
-    }
-    
-    .attribution-icon {
-        height: 10px;
-    }
-}
-
-/* Landscape mode adjustments */
-@media (max-width: 1024px) and (orientation: landscape) {
-    .content-area .attribution {
-        font-size: 0.65rem;
-        margin-top: 1.5rem;
-        padding-top: 0.75rem;
-    }
 }

@@ -1,4 +1,4 @@
-// State Machine for Quantum Source Interactive Experience - Optimized Version
+// State Machine for Quantum Source Interactive Experience v6
 
 // State definitions
 const states = {
@@ -51,57 +51,12 @@ const animations = {
 // Current state
 let currentState = 1;
 let isTransitioning = false;
-let resizeTimeout;
+let resizeTimeout; 
 
 // Audio configuration
 let soundEnabled = true;
-let audioContext;
-let audioBuffer;
-
-// Preloaded assets
-const preloadedVideos = new Map();
-const preloadedImages = new Map();
-
-// Create and initialize Web Audio API for zero-latency sound
-async function initAudio() {
-    try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioContext = new AudioContext();
-        
-        // Load and decode audio file
-        const response = await fetch('assets/sound/buttonSFX.wav');
-        const audioData = await response.arrayBuffer();
-        audioBuffer = await audioContext.decodeAudioData(audioData);
-    } catch (err) {
-        console.warn('Audio initialization failed:', err);
-    }
-}
-
-// Play sound with Web Audio API for instant playback
-function playButtonSound() {
-    if (!soundEnabled || !audioContext || !audioBuffer) return;
-    
-    try {
-        // Resume context if suspended (required for some browsers)
-        if (audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
-        
-        // Create a source node for each playback
-        const source = audioContext.createBufferSource();
-        const gainNode = audioContext.createGain();
-        
-        source.buffer = audioBuffer;
-        gainNode.gain.value = 0.05;
-        
-        source.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        source.start(0);
-    } catch (err) {
-        console.warn('Audio playback error:', err);
-    }
-}
+const buttonSound = new Audio('assets/sound/buttonSFX.wav');
+buttonSound.volume = 0.05;
 
 // DOM elements
 const stateVisual = document.getElementById('stateVisual');
@@ -138,59 +93,16 @@ function getLayoutMode() {
     }
 }
 
-// Preload all animations and images
-async function preloadAllAssets() {
-    // Preload all images
-    const imagePromises = Object.values(states).map(state => {
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = () => {
-                preloadedImages.set(state.image, img);
-                resolve();
-            };
-            img.onerror = resolve;
-            img.src = state.image;
-        });
-    });
-
-    // Preload all videos
-    const videoPromises = Object.entries(animations).map(([key, path]) => {
-        return new Promise((resolve) => {
-            const video = document.createElement('video');
-            video.preload = 'auto';
-            video.muted = true;
-            video.playsInline = true;
-            video.setAttribute('webkit-playsinline', '');
-            video.setAttribute('disablePictureInPicture', '');
-            
-            video.onloadeddata = () => {
-                preloadedVideos.set(path, video);
-                resolve();
-            };
-            video.onerror = resolve;
-            video.src = path;
-        });
-    });
-
-    await Promise.all([...imagePromises, ...videoPromises]);
-}
-
 // Initialize on DOM load
-document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize audio immediately
-    initAudio();
-    
-    // Setup listeners
+document.addEventListener('DOMContentLoaded', () => {
     setupNavListeners();
     setupAudioListeners();
-    setupBackgroundClickNavigation();
-    
-    // Update initial state
+    preloadAnimations();
     updateActiveNav();
     updateContent(currentState);
     
-    // Preload all assets in the background
-    preloadAllAssets();
+    // Set up background click navigation
+    setupBackgroundClickNavigation();
     
     // Keep this to prevent unwanted interactions
     const backgroundContainer = document.querySelector('.background-container');
@@ -213,16 +125,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-// Add ripple effect to buttons
-function addRippleEffect(button) {
-    button.classList.add('ripple');
-    setTimeout(() => {
-        button.classList.remove('ripple');
-    }, 400);
-}
-
 // Setup audio button listeners
 function setupAudioListeners() {
+    // Add click sound to all nav buttons
+    allNavItems.forEach(item => {
+        item.addEventListener('click', playButtonSound);
+    });
+    
     // Add click sound to utility buttons (except audio toggle)
     document.querySelectorAll('.utility-btn:not([title="Audio"])').forEach(btn => {
         btn.addEventListener('click', playButtonSound);
@@ -247,41 +156,56 @@ function setupAudioListeners() {
     }
 }
 
-// Setup navigation listeners with immediate feedback
+// Setup navigation listeners
 function setupNavListeners() {
     allNavItems.forEach(item => {
-        // Use touchstart for mobile and mousedown for desktop for fastest response
-        ['touchstart', 'mousedown'].forEach(eventType => {
-            item.addEventListener(eventType, (e) => {
-                e.preventDefault();
-                
-                const target = Number(item.dataset.state);
-                if (target === currentState || !states[target]) return;
-                
-                // Immediate visual feedback
-                addRippleEffect(item);
-                playButtonSound();
-                
-                // Update active state immediately
-                updateActiveNav(target);
-                
-                // Start transition
-                if (!isTransitioning) {
-                    transitionToState(target);
-                }
-            }, { passive: false });
+        item.addEventListener('click', () => {
+            const target = Number(item.dataset.state);
+            if (!isTransitioning && target !== currentState && states[target]) {
+                transitionToState(target);
+            }
         });
     });
 }
 
-// Update active navigation state immediately
-function updateActiveNav(targetState = currentState) {
+// Update active navigation state for both desktop and mobile
+function updateActiveNav() {
     allNavItems.forEach(item => {
-        item.classList.toggle('active', Number(item.dataset.state) === targetState);
+        item.classList.toggle('active', Number(item.dataset.state) === currentState);
     });
 }
 
-// Main transition function - optimized
+// Preload animations for smooth playback
+function preloadAnimations() {
+    Object.values(animations).forEach(path => {
+        const video = document.createElement('video');
+        video.src = path;
+        video.preload = 'auto';
+        video.muted = true;
+        video.playsInline = true;
+        video.setAttribute('webkit-playsinline', '');
+        video.setAttribute('disablePictureInPicture', '');
+        video.setAttribute('controls', 'false');
+        video.onerror = () => {
+            console.warn(`Unable to preload animation: ${path}`);
+        };
+    });
+}
+
+// Play button sound function
+function playButtonSound() {
+    if (soundEnabled) {
+        try {
+            const soundClone = buttonSound.cloneNode();
+            soundClone.volume = 0.05;
+            soundClone.play().catch(err => console.warn('Audio playback error:', err));
+        } catch (err) {
+            console.warn('Audio error:', err);
+        }
+    }
+}
+
+// Main transition function
 async function transitionToState(targetState, isCompoundSegment = false) {
     if (isTransitioning || targetState === currentState || !states[targetState]) return;
 
@@ -325,6 +249,9 @@ async function transitionToState(targetState, isCompoundSegment = false) {
 
         // Update state
         currentState = targetState;
+
+        // Update nav state
+        updateActiveNav();
 
     } catch (error) {
         console.error('Transition error:', error);
@@ -377,8 +304,6 @@ function startTextTransition(fromState, toState) {
 
 // Create a smooth fade transition between two text contents
 function fadeTextTransition(element, fromText, toText) {
-    if (!element) return;
-    
     // Create a wrapper if it doesn't exist
     let wrapper = element.querySelector('.text-transition-wrapper');
     if (!wrapper) {
@@ -387,14 +312,14 @@ function fadeTextTransition(element, fromText, toText) {
     }
     
     // Fade out
-    wrapper.style.transition = 'opacity 0.2s ease-out';
+    wrapper.style.transition = 'opacity 0.3s ease-out';
     wrapper.style.opacity = '0';
     
     // After fade out, update content and fade back in
     setTimeout(() => {
         wrapper.innerHTML = toText;
         wrapper.style.opacity = '1';
-    }, 200);
+    }, 300);
 }
 
 // Compound transition through intermediate state
@@ -418,7 +343,7 @@ async function performCompoundTransition(fromState, intermediateState, toState) 
         }
         
         // Brief pause between animations
-        await wait(50);
+        await wait(100);
         
         // Second leg: direct from intermediate to target
         const secondKey = `${intermediateState}-${toState}`;
@@ -445,10 +370,12 @@ function instantTransition(targetState, isCompoundSegment = false) {
     return new Promise((resolve) => {
         const newState = states[targetState];
         if (newState && newState.image) {
-            const preloadedImg = preloadedImages.get(newState.image);
-            if (preloadedImg) {
-                stateVisual.src = preloadedImg.src;
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                stateVisual.src = tempImg.src;
+                // Only update content if this isn't part of a compound transition
                 if (!isCompoundSegment) {
+                    // Since this is instant, directly update content
                     updateContent(targetState);
                 }
                 // Adjust portrait layout after image loads
@@ -456,26 +383,12 @@ function instantTransition(targetState, isCompoundSegment = false) {
                     adjustPortraitLayout();
                 }, 50);
                 resolve();
-            } else {
-                // Fallback if not preloaded
-                const tempImg = new Image();
-                tempImg.onload = () => {
-                    stateVisual.src = tempImg.src;
-                    if (!isCompoundSegment) {
-                        updateContent(targetState);
-                    }
-                    // Adjust portrait layout after image loads
-                    setTimeout(() => {
-                        adjustPortraitLayout();
-                    }, 50);
-                    resolve();
-                };
-                tempImg.onerror = () => {
-                    console.warn(`Failed to load image: ${newState.image}`);
-                    resolve();
-                };
-                tempImg.src = newState.image;
-            }
+            };
+            tempImg.onerror = () => {
+                console.warn(`Failed to load image: ${newState.image}`);
+                resolve();
+            };
+            tempImg.src = newState.image;
         } else {
             resolve();
         }
@@ -485,40 +398,21 @@ function instantTransition(targetState, isCompoundSegment = false) {
 // Play transition animation
 function playTransitionAnimation(animationPath, targetState, isCompoundSegment = false) {
     return new Promise((resolve, reject) => {
-        const preloadedVideo = preloadedVideos.get(animationPath);
-        
-        if (preloadedVideo) {
-            // Use the preloaded video data
-            stateAnimation.src = preloadedVideo.src;
+        stateAnimation.src = animationPath;
+
+        stateAnimation.onloadedmetadata = () => {
             stateAnimation.currentTime = 0;
             stateAnimation.playbackRate = 1;
-            
+
+            // Show the video instantly
             stateAnimation.classList.add('playing');
-            
-            const playPromise = stateAnimation.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(err => {
+            stateAnimation
+                .play()
+                .catch(err => {
                     console.error('Playback error:', err);
                     updateToTargetImage();
                 });
-            }
-        } else {
-            // Original loading code as fallback
-            stateAnimation.src = animationPath;
-            
-            stateAnimation.onloadedmetadata = () => {
-                stateAnimation.currentTime = 0;
-                stateAnimation.playbackRate = 1;
-                
-                stateAnimation.classList.add('playing');
-                stateAnimation
-                    .play()
-                    .catch(err => {
-                        console.error('Playback error:', err);
-                        updateToTargetImage();
-                    });
-            };
-        }
+        };
 
         stateAnimation.onended = () => {
             updateToTargetImage();
@@ -526,18 +420,19 @@ function playTransitionAnimation(animationPath, targetState, isCompoundSegment =
 
         stateAnimation.onerror = () => {
             console.error(`Failed to load animation: ${animationPath}`);
+            // Fallback to instant transition
             instantTransition(targetState, isCompoundSegment).then(resolve).catch(reject);
         };
 
         function updateToTargetImage() {
             const newState = states[targetState];
             if (newState && newState.image) {
-                const preloadedImg = preloadedImages.get(newState.image);
-                const tempImg = preloadedImg || new Image();
-                
-                const updateImage = () => {
-                    stateVisual.src = newState.image;
+                const tempImg = new Image();
+                tempImg.onload = () => {
+                    stateVisual.src = tempImg.src;
+                    // Only update content if this isn't part of a compound transition
                     if (!isCompoundSegment) {
+                        // Ensure content matches the target state
                         updateContent(targetState);
                     }
                     adjustPortraitLayout();
@@ -546,18 +441,12 @@ function playTransitionAnimation(animationPath, targetState, isCompoundSegment =
                         resolve();
                     }, 50);
                 };
-                
-                if (preloadedImg) {
-                    updateImage();
-                } else {
-                    tempImg.onload = updateImage;
-                    tempImg.onerror = () => {
-                        console.warn(`Failed to load image: ${newState.image}`);
-                        stateAnimation.classList.remove('playing');
-                        resolve();
-                    };
-                    tempImg.src = newState.image;
-                }
+                tempImg.onerror = () => {
+                    console.warn(`Failed to load image: ${newState.image}`);
+                    stateAnimation.classList.remove('playing');
+                    resolve();
+                };
+                tempImg.src = newState.image;
             } else {
                 stateAnimation.classList.remove('playing');
                 resolve();
@@ -613,7 +502,6 @@ function wait(ms) {
 // Handle browser back/forward buttons
 window.addEventListener('popstate', (event) => {
     if (event.state?.stateId !== undefined) {
-        updateActiveNav(event.state.stateId);
         transitionToState(event.state.stateId);
     }
 });
@@ -657,47 +545,6 @@ window.addEventListener('resize', () => {
 // Also call after image loads or transitions
 stateVisual.addEventListener('load', adjustPortraitLayout);
 
-// Setup background click navigation
-function setupBackgroundClickNavigation() {
-    const clickCaptureLayer = document.getElementById('clickCaptureLayer');
-    
-    if (clickCaptureLayer) {
-        console.log('Click capture layer found, adding click listener');
-        
-        ['touchstart', 'mousedown'].forEach(eventType => {
-            clickCaptureLayer.addEventListener(eventType, (e) => {
-                e.preventDefault();
-                console.log('Background clicked!');
-                
-                // Define the navigation sequence
-                const nextState = {
-                    1: 2,
-                    2: 3,
-                    3: 1,
-                    5: 1
-                };
-                
-                // Get the next state based on current state
-                const targetState = nextState[currentState];
-                
-                // If we're not already transitioning and there's a valid next state
-                if (!isTransitioning && targetState && states[targetState]) {
-                    // Play button sound for consistent feedback
-                    playButtonSound();
-                    
-                    // Update active state immediately
-                    updateActiveNav(targetState);
-                    
-                    // Transition to the next state
-                    transitionToState(targetState);
-                }
-            }, { passive: false });
-        });
-    } else {
-        console.error('Click capture layer not found in the DOM');
-    }
-}
-
 /* 
  * Transition Logic Summary:
  * Direct transitions: 1↔2, 1↔5, 2↔3, 3→1, 1→3
@@ -705,3 +552,74 @@ function setupBackgroundClickNavigation() {
  * - 2→5, 3→5: go through state 1 first
  * - 5→2, 5→3: go through state 1 first
  */
+
+// Add this to your document.addEventListener('DOMContentLoaded', ...) function
+document.addEventListener('DOMContentLoaded', () => {
+    // Your existing initialization code
+    setupNavListeners();
+    setupAudioListeners();
+    preloadAnimations();
+    updateActiveNav();
+    updateContent(currentState);
+    
+    // Set up background click navigation
+    setupBackgroundClickNavigation();
+    
+    // Keep this to prevent unwanted interactions
+    const backgroundContainer = document.querySelector('.background-container');
+    const stateVisual = document.getElementById('stateVisual');
+    const stateAnimation = document.getElementById('stateAnimation');
+    
+    const elements = [stateVisual, stateAnimation];
+    const events = ['dblclick', 'contextmenu', 'mousedown', 'touchstart'];
+    
+    elements.forEach(element => {
+        if (element) {
+            events.forEach(event => {
+                element.addEventListener(event, e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }, { passive: false });
+            });
+        }
+    });
+});
+
+// Add this new function
+function setupBackgroundClickNavigation() {
+    const clickCaptureLayer = document.getElementById('clickCaptureLayer');
+    
+    if (clickCaptureLayer) {
+        console.log('Click capture layer found, adding click listener'); // Debug
+        clickCaptureLayer.addEventListener('click', (e) => {
+            console.log('Background clicked!'); // Debug
+            
+            // Define the navigation sequence
+            const nextState = {
+                1: 2,
+                2: 3,
+                3: 1,
+                5: 1
+            };
+            
+            // Get the next state based on current state
+            const targetState = nextState[currentState];
+            
+            // If we're not already transitioning and there's a valid next state
+            if (!isTransitioning && targetState && states[targetState]) {
+                // Play button sound for consistent feedback
+                if (typeof playButtonSound === 'function') {
+                    playButtonSound();
+                }
+                
+                // Transition to the next state
+                if (typeof transitionToState === 'function') {
+                    transitionToState(targetState);
+                }
+            }
+        });
+    } else {
+        console.error('Click capture layer not found in the DOM'); // Debug
+    }
+}

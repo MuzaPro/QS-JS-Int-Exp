@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Source - Universal Quantum Computing</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Variables v13 - Fixed Mobile Layouts */
+        :root {
+            --secondary-bg: #0F282D;
+            --main-bg: #183948;
+            --menu-bar: #09181F;
+            --secondary: #166470;
+            --accent: #3EC1C9;
+            --text-overlay-bg: rgba(15, 40, 45, 0.8);
+            --menu-gradient: linear-gradient(90deg, #0F282D 0%, rgba(15, 40, 45, 0.8) 100%);
+        }
+
+        /* CSS Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Overpass', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            background: var(--menu-bar);
+            /* Optimize touch responsiveness */
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Full Screen Background Container */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .state-visual {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            will-change: transform;
+        }
+
+        .state-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+            z-index: 2;
+            will-change: opacity;
+        }
+
+        .state-animation.playing {
+            opacity: 1;
+        }
+
+        /* Make background elements completely non-interactive, EXCEPT the click capture layer */
+        .background-container {
+            touch-action: none;
+        }
+
+        .state-visual,
+        .state-animation {
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Desktop Layout - Default */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 25vw;
+            height: 100vh;
+            background: var(--menu-gradient);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Desktop Navigation Menu */
+        .nav-menu {
+            background: var(--menu-bar);
+            padding: 2rem 0;
+            border-bottom: 1px solid rgba(62, 193, 201, 0.2);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.1s ease, padding-left 0.15s ease, transform 0.05s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            cursor: pointer;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+            /* Add active press state */
+            transform: scale(1);
+        }
+
+        /* Immediate press feedback */
+        .nav-item:active {
+            transform: scale(0.97);
+            transition: transform 0.05s ease;
+        }
+
+        /* Ripple effect for immediate feedback */
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+
+        .nav-item.ripple::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .nav-item:hover {
+            background: rgba(62, 193, 201, 0.1);
+            padding-left: 2.5rem;
+        }
+
+        .nav-item.active {
+            background: rgba(62, 193, 201, 0.2);
+            border-right: 3px solid var(--accent);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 1rem;
+            fill: currentColor;
+        }
+
+        .nav-icon[src$=".svg"] {
+            filter: brightness(0) invert(1);
+        }
+
+        .nav-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Desktop Content Area */
+        .content-area {
+            flex: 1;
+            padding: 3rem 2rem;
+            background: var(--text-overlay-bg);
+            overflow-y: auto;
+            transition: opacity 0.2s ease;
+        }
+
+        .content-area.fade-out {
+            opacity: 0;
+        }
+
+        .main-title {
+            font-family: 'Overpass', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            color: white !important;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .description {
+            color: rgba(255, 255, 255, 0.9) !important;
+            line-height: 1.6;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .description:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight {
+            color: var(--accent) !important;
+            font-weight: 600;
+        }
+
+        /* Mobile elements - hidden on desktop */
+        .mobile-nav-bar {
+            display: none;
+        }
+
+        .mobile-content-strip {
+            display: none;
+        }
+
+        .utility-menu {
+            display: none;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(62, 193, 201, 0.3);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .loading-spinner.visible {
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Tablet Layout */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 35vw;
+            }
+            
+            .main-title {
+                font-size: 1.75rem;
+            }
+            
+            .nav-item {
+                padding: 0.75rem 1.5rem;
+            }
+            
+            .nav-item:hover {
+                padding-left: 2rem;
+            }
+        }
+
+        /* MOBILE LAYOUTS - General mobile styles first */
+        @media (max-width: 768px) {
+            /* Hide desktop sidebar on all mobile */
+            .sidebar {
+                display: none;
+            }
+            
+            /* Mobile nav bar styling */
+            .mobile-nav-bar {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 60px;
+                background: var(--menu-bar);
+                z-index: 20;
+                align-items: center;
+                justify-content: space-around;
+                border-bottom: 1px solid rgba(62, 193, 201, 0.2);
+            }
+            
+            .mobile-nav-bar .nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 0.5rem;
+                color: white;
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-family: inherit;
+                transition: all 0.1s ease;
+                flex: 1;
+                gap: 0.25rem;
+                margin-right: 0;
+            }
+            
+            .mobile-nav-bar .nav-item:active {
+                transform: scale(0.95);
+            }
+            
+            .mobile-nav-bar .nav-item:hover {
+                background: rgba(62, 193, 201, 0.1);
+            }
+            
+            .mobile-nav-bar .nav-item.active {
+                background: rgba(62, 193, 201, 0.2);
+                border-bottom: 2px solid var(--accent);
+                border-right: none;
+            }
+            
+            .mobile-nav-bar .nav-icon {
+                width: 20px;
+                height: 20px;
+                fill: currentColor;
+                margin-right: 0;
+            }
+            
+            .mobile-nav-bar .nav-icon[src$=".svg"] {
+                filter: brightness(0) invert(1);
+            }
+            
+            .mobile-nav-bar .nav-text {
+                font-size: 0.7rem;
+                font-weight: 500;
+            }
+            
+            /* Mobile content strip styling */
+            .mobile-content-strip {
+                display: block;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100vw;
+                background: var(--text-overlay-bg);
+                z-index: 15;
+                padding: 1.25rem;
+                overflow-y: auto;
+                transition: opacity 0.2s ease;
+                box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.4);
+            }
+            
+            .mobile-content-strip.fade-out {
+                opacity: 0;
+            }
+            
+            .mobile-content-strip .main-title {
+                font-size: 1.3rem;
+                margin-bottom: 0.75rem;
+                line-height: 1.2;
+                color: white !important;
+                font-weight: 700;
+            }
+            
+            .mobile-content-strip .description {
+                font-size: 0.95rem;
+                line-height: 1.5;
+                margin-bottom: 0.5rem;
+                color: rgba(255, 255, 255, 0.9) !important;
+            }
+            
+            .mobile-content-strip .description:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        /* Text transition effects */
+        .text-transition-wrapper {
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .click-capture-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: pointer;
+            pointer-events: auto;
+            -webkit-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-touch-callout: none !important;
+            outline: none !important;
+        }
+
+        /* Performance optimizations */
+        .nav-item,
+        .state-visual,
+        .state-animation,
+        .content-area {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner"></div>
+
+    <!-- Background Animation/Image Container -->
+    <div class="background-container">
+        <div id="clickCaptureLayer" class="click-capture-layer"></div>
+        <img src="assets/images/state1-static.webp" 
+             alt="Quantum Source Lab Environment" 
+             class="state-visual"
+             id="stateVisual">
+        <video class="state-animation" 
+               id="stateAnimation"
+               preload="auto"
+               muted
+               playsinline
+               webkit-playsinline
+               disablePictureInPicture>
+            <source src="" type="video/webm">
+        </video>
+    </div>
+
+    <!-- Desktop Sidebar -->
+    <div class="sidebar">
+        <!-- Desktop Navigation Menu -->
+        <nav class="nav-menu">
+            <button class="nav-item active" data-state="1">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                <span class="nav-text">Overview</span>
+            </button>
+            
+            <button class="nav-item" data-state="2">
+                <img src="assets/ui-icons/nav-bar/building-2.svg" class="nav-icon" alt="System Icon">
+                <span class="nav-text">System</span>
+            </button>
+            
+            <button class="nav-item" data-state="3">
+                <img src="assets/ui-icons/nav-bar/cpu.svg" class="nav-icon" alt="Chamber Icon">
+                <span class="nav-text">Chamber</span>
+            </button>
+            
+            <button class="nav-item" data-state="5">
+                <img src ="assets/ui-icons/nav-bar/monitor-cog.svg" class="nav-icon" alt="Technology Icon">
+                <span class="nav-text">Technology</span>
+            </button>
+        </nav>
+
+        <!-- Desktop Content Area -->
+        <div class="content-area" id="contentArea">
+            <h1 class="main-title" id="mainTitle">Introduction to Modestly Sized Quantum Computing</h1>
+            <p class="description" id="description1">
+                Welcome to the future of quantum computing. Instead of requiring factory-sized facilities, our technology brings universal quantum computers to your laboratory.
+            </p>
+            <p class="description" id="description2">
+                The text will introduce the interactive elements and invite visitors to explore the conceptual structure of a quantum computer that fits in your room (instead of <em>being</em> the room).
+            </p>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Bar (shown only on mobile) -->
+    <div class="mobile-nav-bar">
+        <button class="nav-item active" data-state="1">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span class="nav-text">Overview</span>
+        </button>
+        
+        <button class="nav-item" data-state="2">
+            <img src="assets/ui-icons/nav-bar/building-2.svg" class="nav-icon" alt="System Icon">
+            <span class="nav-text">System</span>
+        </button>
+        
+        <button class="nav-item" data-state="3">
+            <img src="assets/ui-icons/nav-bar/cpu.svg" class="nav-icon" alt="Chamber Icon">
+            <span class="nav-text">Chamber</span>
+        </button>
+        
+        <button class="nav-item" data-state="5">
+            <img src ="assets/ui-icons/nav-bar/monitor-cog.svg" class="nav-icon" alt="Technology Icon">
+            <span class="nav-text">Technology</span>
+        </button>
+    </div>
+
+    <!-- Mobile Content Strip (shown only on mobile) -->
+    <div class="mobile-content-strip" id="mobileContentArea">
+        <h1 class="main-title" id="mobileMainTitle">Introduction to Modestly Sized Quantum Computing</h1>
+        <p class="description" id="mobileDescription1">
+            Welcome to the future of quantum computing. Instead of requiring factory-sized facilities, our technology brings universal quantum computers to your laboratory.
+        </p>
+        <p class="description" id="mobileDescription2">
+            The text will introduce the interactive elements and invite visitors to explore the conceptual structure of a quantum computer that fits in your room (instead of <em>being</em> the room).
+        </p>
+    </div>
+
+    <script>
+        // State Machine for Quantum Source Interactive Experience - Optimized Version
+
+        // State definitions
+        const states = {
+            1: {
+                title: "Introduction to Modestly Sized Quantum Computers",
+                descriptions: [
+                    "Welcome to the future of quantum computing. Instead of requiring factory-sized facilities, our technology will bring universal quantum computers to your laboratory.",
+                    "<span class='highlight'>Use the navigation buttons above</span> to explore the conceptual structure of a quantum computer that fits in your room (instead of <em>being</em> the room)."
+                ],
+                image: "assets/images/state1-static.webp"
+            },
+            2: {
+                title: "Quantum System Components",
+                descriptions: [
+                    "Our quantum computer consists of three main components: the vacuum chamber housing the qubits, optical fiber memory for photon storage, and classical processing unit.",
+                    "This small form factor is made possible thanks to our <span class='highlight'>deterministic approach</span>, which eliminates the massive resource overhead of probabilistic systems, making quantum computing accessible and practical."
+                ],
+                image: "assets/images/state2-static.webp"
+            },
+            3: {
+                title: "Vacuum Chamber",
+                descriptions: [
+                    "Unlike competing technologies requiring extreme cooling, our <span class='highlight'>vacuum chamber operates at room temperature</span>, dramatically reducing infrastructure costs.",
+                    "The rubidium atoms are perfectly isolated from environmental noise while remaining accessible for precise manipulation and measurement."
+                ],
+                image: "assets/images/state3-static.webp"
+            },
+            5: {
+                title: "Photonic Quantum Computing",
+                descriptions: [
+                    "this approach utilizes <span class='highlight'>individual photons as qubits,</span>  to carry out quantum operations at room temperature. ", 
+                    "By leveraging low-loss waveguides and existing fiber networks, this approach offers scalability and low-decoherence pathways toward large-scale quantum processors."
+                ],
+                image: "assets/images/state5-static.webp"
+            }
+        };
+
+        // Animation paths
+        const animations = {
+            "1-2": "assets/animations/1to2.webm",
+            "2-1": "assets/animations/2to1.webm",
+            "1-5": "assets/animations/1to5.webm",
+            "5-1": "assets/animations/5to1.webm",
+            "2-3": "assets/animations/2to3.webm",
+            "3-2": "assets/animations/3to2.webm",
+            "3-1": "assets/animations/3to1.webm",
+            "1-3": "assets/animations/1to3.webm" 
+        };
+
+        // Current state
+        let currentState = 1;
+        let isTransitioning = false;
+        let resizeTimeout;
+        let loadingTimeout;
+
+        // Audio configuration
+        let soundEnabled = true;
+        let audioContext;
+        let audioBuffer;
+
+        // Create and initialize Web Audio API for zero-latency sound
+        async function initAudio() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioContext();
+                
+                // Load and decode audio file
+                const response = await fetch('assets/sound/buttonSFX.wav');
+                const audioData = await response.arrayBuffer();
+                audioBuffer = await audioContext.decodeAudioData(audioData);
+            } catch (err) {
+                console.warn('Audio initialization failed:', err);
+            }
+        }
+
+        // Play sound with Web Audio API for instant playback
+        function playButtonSound() {
+            if (!soundEnabled || !audioContext || !audioBuffer) return;
+            
+            try {
+                // Resume context if suspended (required for some browsers)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                // Create a source node for each playback
+                const source = audioContext.createBufferSource();
+                const gainNode = audioContext.createGain();
+                
+                source.buffer = audioBuffer;
+                gainNode.gain.value = 0.05;
+                
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                source.start(0);
+            } catch (err) {
+                console.warn('Audio playback error:', err);
+            }
+        }
+
+        // DOM elements
+        const stateVisual = document.getElementById('stateVisual');
+        const stateAnimation = document.getElementById('stateAnimation');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        // Desktop content elements
+        const contentArea = document.getElementById('contentArea');
+        const mainTitle = document.getElementById('mainTitle');
+        const description1 = document.getElementById('description1');
+        const description2 = document.getElementById('description2');
+
+        // Mobile content elements
+        const mobileContentArea = document.getElementById('mobileContentArea');
+        const mobileMainTitle = document.getElementById('mobileMainTitle');
+        const mobileDescription1 = document.getElementById('mobileDescription1');
+        const mobileDescription2 = document.getElementById('mobileDescription2');
+
+        // Navigation elements
+        const allNavItems = document.querySelectorAll('.nav-item');
+
+        // Preload all animations and images
+        const preloadedVideos = new Map();
+        const preloadedImages = new Map();
+
+        async function preloadAllAssets() {
+            // Preload all images
+            const imagePromises = Object.values(states).map(state => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        preloadedImages.set(state.image, img);
+                        resolve();
+                    };
+                    img.onerror = resolve;
+                    img.src = state.image;
+                });
+            });
+
+            // Preload all videos
+            const videoPromises = Object.entries(animations).map(([key, path]) => {
+                return new Promise((resolve) => {
+                    const video = document.createElement('video');
+                    video.preload = 'auto';
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.setAttribute('webkit-playsinline', '');
+                    video.setAttribute('disablePictureInPicture', '');
+                    
+                    video.onloadeddata = () => {
+                        preloadedVideos.set(path, video);
+                        resolve();
+                    };
+                    video.onerror = resolve;
+                    video.src = path;
+                });
+            });
+
+            await Promise.all([...imagePromises, ...videoPromises]);
+        }
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize audio immediately
+            initAudio();
+            
+            // Setup listeners
+            setupNavListeners();
+            setupBackgroundClickNavigation();
+            
+            // Update initial state
+            updateActiveNav();
+            updateContent(currentState);
+            
+            // Preload all assets in the background
+            preloadAllAssets();
+            
+            // Prevent unwanted interactions
+            const elements = [stateVisual, stateAnimation];
+            const events = ['dblclick', 'contextmenu'];
+            
+            elements.forEach(element => {
+                if (element) {
+                    events.forEach(event => {
+                        element.addEventListener(event, e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        });
+                    });
+                }
+            });
+        });
+
+        // Add ripple effect to buttons
+        function addRippleEffect(button) {
+            button.classList.add('ripple');
+            setTimeout(() => {
+                button.classList.remove('ripple');
+            }, 400);
+        }
+
+        // Setup navigation listeners with immediate feedback
+        function setupNavListeners() {
+            allNavItems.forEach(item => {
+                // Use touchstart for mobile and mousedown for desktop for fastest response
+                ['touchstart', 'mousedown'].forEach(eventType => {
+                    item.addEventListener(eventType, (e) => {
+                        e.preventDefault();
+                        
+                        const target = Number(item.dataset.state);
+                        if (target === currentState || !states[target]) return;
+                        
+                        // Immediate visual feedback
+                        addRippleEffect(item);
+                        playButtonSound();
+                        
+                        // Update active state immediately
+                        updateActiveNav(target);
+                        
+                        // Start transition
+                        if (!isTransitioning) {
+                            transitionToState(target);
+                        }
+                    }, { passive: false });
+                });
+            });
+        }
+
+        // Update active navigation state immediately
+        function updateActiveNav(targetState = currentState) {
+            allNavItems.forEach(item => {
+                item.classList.toggle('active', Number(item.dataset.state) === targetState);
+            });
+        }
+
+        // Show loading spinner after delay
+        function showLoadingSpinner() {
+            loadingTimeout = setTimeout(() => {
+                loadingSpinner.classList.add('visible');
+            }, 200);
+        }
+
+        function hideLoadingSpinner() {
+            clearTimeout(loadingTimeout);
+            loadingSpinner.classList.remove('visible');
+        }
+
+        // Main transition function - optimized
+        async function transitionToState(targetState, isCompoundSegment = false) {
+            if (isTransitioning || targetState === currentState || !states[targetState]) return;
+
+            isTransitioning = true;
+            showLoadingSpinner();
+
+            const key = `${currentState}-${targetState}`;
+            const animationPath = animations[key];
+            
+            try {
+                // Start content transition immediately
+                if (!isCompoundSegment) {
+                    startTextTransition(currentState, targetState);
+                }
+                
+                // Check if direct animation exists
+                if (animationPath) {
+                    await playTransitionAnimation(animationPath, targetState);
+                } 
+                // Handle compound transitions
+                else {
+                    if ((currentState === 2 && targetState === 5) || 
+                        (currentState === 3 && targetState === 5)) {
+                        await performCompoundTransition(currentState, 1, targetState);
+                    }
+                    else if ((currentState === 5 && targetState === 2) ||
+                             (currentState === 5 && targetState === 3)) {
+                        await performCompoundTransition(currentState, 1, targetState);
+                    }
+                    else {
+                        await instantTransition(targetState);
+                    }
+                }
+
+                currentState = targetState;
+
+            } catch (error) {
+                console.error('Transition error:', error);
+                updateContent(targetState);
+                currentState = targetState;
+            } finally {
+                isTransitioning = false;
+                hideLoadingSpinner();
+            }
+        }
+
+        // Optimized text transition
+        function startTextTransition(fromState, toState) {
+            const fromStateData = states[fromState];
+            const toStateData = states[toState];
+            
+            if (!fromStateData || !toStateData) return;
+            
+            // Update all text elements
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                fadeTextTransition(mobileMainTitle, fromStateData.title, toStateData.title);
+                fadeTextTransition(mobileDescription1, fromStateData.descriptions[0], toStateData.descriptions[0]);
+                fadeTextTransition(mobileDescription2, fromStateData.descriptions[1], toStateData.descriptions[1]);
+            } else {
+                fadeTextTransition(mainTitle, fromStateData.title, toStateData.title);
+                fadeTextTransition(description1, fromStateData.descriptions[0], toStateData.descriptions[0]);
+                fadeTextTransition(description2, fromStateData.descriptions[1], toStateData.descriptions[1]);
+            }
+        }
+
+        // Faster text transition
+        function fadeTextTransition(element, fromText, toText) {
+            if (!element) return;
+            
+            let wrapper = element.querySelector('.text-transition-wrapper');
+            if (!wrapper) {
+                element.innerHTML = `<div class="text-transition-wrapper">${element.innerHTML}</div>`;
+                wrapper = element.querySelector('.text-transition-wrapper');
+            }
+            
+            wrapper.style.opacity = '0';
+            
+            setTimeout(() => {
+                wrapper.innerHTML = toText;
+                wrapper.style.opacity = '1';
+            }, 200);
+        }
+
+        // Compound transition through intermediate state
+        async function performCompoundTransition(fromState, intermediateState, toState) {
+            startTextTransition(fromState, toState);
+            
+            const firstKey = `${fromState}-${intermediateState}`;
+            const firstAnimation = animations[firstKey];
+            
+            if (firstAnimation) {
+                await playTransitionAnimation(firstAnimation, intermediateState, true);
+            } else {
+                await instantTransition(intermediateState, true);
+            }
+            
+            await wait(50); // Reduced pause
+            
+            const secondKey = `${intermediateState}-${toState}`;
+            const secondAnimation = animations[secondKey];
+            
+            if (secondAnimation) {
+                await playTransitionAnimation(secondAnimation, toState, true);
+            } else {
+                await instantTransition(toState, true);
+            }
+        }
+
+        // Optimized instant transition
+        function instantTransition(targetState, isCompoundSegment = false) {
+            return new Promise((resolve) => {
+                const newState = states[targetState];
+                if (newState && newState.image) {
+                    const preloadedImg = preloadedImages.get(newState.image);
+                    if (preloadedImg) {
+                        stateVisual.src = preloadedImg.src;
+                        if (!isCompoundSegment) {
+                            updateContent(targetState);
+                        }
+                        resolve();
+                    } else {
+                        // Fallback if not preloaded
+                        const tempImg = new Image();
+                        tempImg.onload = () => {
+                            stateVisual.src = tempImg.src;
+                            if (!isCompoundSegment) {
+                                updateContent(targetState);
+                            }
+                            resolve();
+                        };
+                        tempImg.onerror = () => {
+                            console.warn(`Failed to load image: ${newState.image}`);
+                            resolve();
+                        };
+                        tempImg.src = newState.image;
+                    }
+                } else {
+                    resolve();
+                }
+            });
+        }
+
+        // Optimized animation playback
+        function playTransitionAnimation(animationPath, targetState, isCompoundSegment = false) {
+            return new Promise((resolve, reject) => {
+                const preloadedVideo = preloadedVideos.get(animationPath);
+                
+                if (preloadedVideo) {
+                    // Clone the preloaded video for playback
+                    stateAnimation.src = preloadedVideo.src;
+                    stateAnimation.currentTime = 0;
+                    stateAnimation.playbackRate = 1.2; // Slightly faster playback
+                    
+                    stateAnimation.classList.add('playing');
+                    
+                    const playPromise = stateAnimation.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(err => {
+                            console.error('Playback error:', err);
+                            instantTransition(targetState, isCompoundSegment).then(resolve);
+                        });
+                    }
+                    
+                    stateAnimation.onended = () => {
+                        updateToTargetImage();
+                    };
+                } else {
+                    // Fallback to instant transition if video not preloaded
+                    instantTransition(targetState, isCompoundSegment).then(resolve);
+                }
+
+                function updateToTargetImage() {
+                    const newState = states[targetState];
+                    if (newState && newState.image) {
+                        const preloadedImg = preloadedImages.get(newState.image);
+                        if (preloadedImg) {
+                            stateVisual.src = preloadedImg.src;
+                            if (!isCompoundSegment) {
+                                updateContent(targetState);
+                            }
+                            setTimeout(() => {
+                                stateAnimation.classList.remove('playing');
+                                resolve();
+                            }, 50);
+                        } else {
+                            stateAnimation.classList.remove('playing');
+                            resolve();
+                        }
+                    } else {
+                        stateAnimation.classList.remove('playing');
+                        resolve();
+                    }
+                }
+            });
+        }
+
+        // Update content for given state
+        function updateContent(stateId) {
+            const state = states[stateId];
+            if (!state) return;
+
+            const isMobile = window.innerWidth <= 768;
+
+            if (!isMobile) {
+                if (mainTitle) mainTitle.innerHTML = state.title;
+                if (description1) description1.innerHTML = state.descriptions[0] || '';
+                if (description2) description2.innerHTML = state.descriptions[1] || '';
+            } else {
+                if (mobileMainTitle) mobileMainTitle.innerHTML = state.title;
+                if (mobileDescription1) mobileDescription1.innerHTML = state.descriptions[0] || '';
+                if (mobileDescription2) mobileDescription2.innerHTML = state.descriptions[1] || '';
+            }
+        }
+
+        // Utility delay function
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Setup background click navigation
+        function setupBackgroundClickNavigation() {
+            const clickCaptureLayer = document.getElementById('clickCaptureLayer');
+            
+            if (clickCaptureLayer) {
+                ['touchstart', 'mousedown'].forEach(eventType => {
+                    clickCaptureLayer.addEventListener(eventType, (e) => {
+                        e.preventDefault();
+                        
+                        const nextState = {
+                            1: 2,
+                            2: 3,
+                            3: 1,
+                            5: 1
+                        };
+                        
+                        const targetState = nextState[currentState];
+                        
+                        if (!isTransitioning && targetState && states[targetState]) {
+                            playButtonSound();
+                            updateActiveNav(targetState);
+                            transitionToState(targetState);
+                        }
+                    }, { passive: false });
+                });
+            }
+        }
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', (event) => {
+            if (event.state?.stateId !== undefined) {
+                updateActiveNav(event.state.stateId);
+                transitionToState(event.state.stateId);
+            }
+        });
+
+        // Optimize resize handling
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                updateContent(currentState);
+            }, 150);
+        });
+    </script>
+</body>
+</html>
