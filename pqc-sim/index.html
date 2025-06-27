@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W-System Quantum Computing Interactive Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --secondary-bg: #0F282D;
+            --main-bg: #183948;
+            --menu-bar: #09181F;
+            --secondary: #166470;
+            --accent: #3EC1C9;
+            --text-overlay-bg: rgba(15, 40, 45, 0.8);
+            --menu-gradient: linear-gradient(90deg, #0F282D 0%, rgba(15, 40, 45, 0.8) 100%);
+            --photon-color: #FFC78E;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Overpass', sans-serif;
+            background: var(--main-bg);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hero-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 2rem;
+        }
+
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .quantum-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: #ccc;
+            margin-bottom: 2rem;
+            line-height: 1.4;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: white;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-description strong {
+            color: var(--accent);
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .level-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(62, 193, 201, 0.2);
+        }
+
+        .level-card.coming-soon {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .level-card.coming-soon:hover {
+            transform: none;
+            border-color: var(--secondary);
+            box-shadow: none;
+        }
+
+        .level-number {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--main-bg);
+        }
+
+        .level-number.coming-soon {
+            background: var(--secondary);
+        }
+
+        .level-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            margin-right: 50px;
+        }
+
+        .level-subtitle {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .level-concepts {
+            font-size: 0.85rem;
+            color: white;
+            line-height: 1.5;
+        }
+
+        .level-concepts ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .level-concepts li {
+            margin-bottom: 0.3rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .level-concepts li::before {
+            content: "•";
+            color: var(--photon-color);
+            position: absolute;
+            left: 0;
+        }
+
+        .coming-soon-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--secondary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .start-button {
+            background: var(--menu-gradient);
+            border: 2px solid var(--accent);
+            padding: 1.5rem 3rem;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Overpass', sans-serif;
+            font-weight: 600;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .start-button:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(62, 193, 201, 0.3);
+        }
+
+        .quantum-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--main-bg);
+            animation: quantumPulse 3s infinite;
+        }
+
+        @keyframes quantumPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(62, 193, 201, 0.3);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 40px rgba(62, 193, 201, 0.6);
+            }
+        }
+
+        .physics-note {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-overlay-bg);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #ccc;
+            border-left: 4px solid var(--accent);
+            max-width: 600px;
+            text-align: left;
+        }
+
+        .physics-note strong {
+            color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .hero-description {
+                font-size: 1rem;
+            }
+            
+            .levels-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .physics-note {
+                position: relative;
+                margin-top: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-container">
+        <!-- Background animation -->
+        <div class="background-animation" id="backgroundAnimation"></div>
+        
+        <div class="hero-content">
+            <div class="quantum-logo">W</div>
+            
+            <h1 class="hero-title">W-System Quantum Computing</h1>
+            <p class="hero-subtitle">Interactive Learning Simulator</p>
+            
+            <p class="hero-description">
+                Explore the cutting-edge world of <strong>photonic quantum computing</strong> through hands-on demonstrations. 
+                Learn how W-type atomic systems enable scalable quantum networks, from fundamental physics to commercial applications.
+            </p>
+            
+            <div class="levels-grid">
+                <div class="level-card" onclick="window.location.href='lvl1.html'">
+                    <div class="level-number">1</div>
+                    <h3 class="level-title">Fundamental Physics</h3>
+                    <p class="level-subtitle">Understanding degenerate energy levels</p>
+                    <div class="level-concepts">
+                        <ul>
+                            <li>W-topology origins</li>
+                            <li>Control field mechanisms</li>
+                            <li>SWAP vs CZ gate switching</li>
+                            <li>Photon-atom interactions</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="level-card" onclick="window.location.href='lvl2.html'">
+                    <div class="level-number">2</div>
+                    <h3 class="level-title">Graph State Generation</h3>
+                    <p class="level-subtitle">Multi-atom quantum networking</p>
+                    <div class="level-concepts">
+                        <ul>
+                            <li>4-photon ring states</li>
+                            <li>Sequential CZ protocols</li>
+                            <li>Entanglement visualization</li>
+                            <li>Quantum state transfer</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="level-card" onclick="window.location.href='lvl3.html'">
+                    <div class="level-number">3</div>
+                    <h3 class="level-title">Error Correction</h3>
+                    <p class="level-subtitle">Fault-tolerant quantum computing</p>
+                    <div class="level-concepts">
+                        <ul>
+                            <li>Surface code basics</li>
+                            <li>Syndrome extraction</li>
+                            <li>Error propagation</li>
+                            <li>Threshold theorem</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="level-card coming-soon">
+                    <div class="coming-soon-badge">Coming Soon</div>
+                    <div class="level-number coming-soon">4</div>
+                    <h3 class="level-title">Quantum Algorithms</h3>
+                    <p class="level-subtitle">Measurement-based quantum computing</p>
+                    <div class="level-concepts">
+                        <ul>
+                            <li>Cluster states</li>
+                            <li>Graph state computation</li>
+                            <li>Quantum advantage</li>
+                            <li>Algorithm implementation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="lvl1.html" class="start-button">Begin Journey →</a>
+        </div>
+    </div>
+
+    <script>
+        // Create floating quantum particles animation
+        function createQuantumParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'quantum-particle';
+            
+            // Random horizontal position
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            
+            // Random animation delay
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            
+            // Random size variation
+            const size = 2 + Math.random() * 4;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            
+            // Random color variation
+            const colors = ['var(--accent)', 'var(--photon-color)', '#FF6B9D'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.background = color;
+            particle.style.boxShadow = `0 0 8px ${color}`;
+            
+            document.getElementById('backgroundAnimation').appendChild(particle);
+            
+            // Remove particle after animation completes
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 20000);
+        }
+        
+        // Create particles periodically
+        function initializeBackgroundAnimation() {
+            // Create initial particles
+            for (let i = 0; i < 15; i++) {
+                setTimeout(createQuantumParticle, i * 1000);
+            }
+            
+            // Continue creating particles
+            setInterval(createQuantumParticle, 2000);
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializeBackgroundAnimation);
+        
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.classList.contains('level-card') && !e.target.classList.contains('coming-soon')) {
+                e.target.click();
+            }
+        });
+        
+        // Make level cards keyboard accessible
+        document.querySelectorAll('.level-card:not(.coming-soon)').forEach(card => {
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+        });
+    </script>
+</body>
+</html>
